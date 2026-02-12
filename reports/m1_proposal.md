@@ -1,4 +1,4 @@
-# Motivation and Purpose
+# 1. Motivation and Purpose
 
 ## Target Audience:
 Our target audience is individual investors who manage their own stock portfolios and want a better way to track how their investments are doing. We are building this dashboard as a helpful financial tool that makes stock information easier to understand and keep track of in one place. 
@@ -15,7 +15,7 @@ Users can see daily price changes, total performance since purchase, current mar
 
 By putting all this information together in a simple and visual way, the dashboard helps investors understand their portfolio faster and make better decisions with less effort.
 
-# Description of the Data
+# 2. Description of the Data
 
 rubric={reasoning:8}
 
@@ -24,31 +24,25 @@ Describe the dataset you finalized in Step 1.
 - **Stats:** Number of rows/columns.
 - **Relevance:** How variables potentially link to the problem.
 
-# Research Questions & Usage Scenarios
+# 3. Research Questions & Usage Scenarios
 
-
-Detail how the audience will interact with the app.
-
-- **Persona:** Brief description of a user.
-- **Usage Scenario** create a narrative describing user needs and context.
-- **User Stories / JTBD:** Provide **at least 3** User Stories or Job Stories that outline specific tasks the user needs to perform.
-
-- **Persona - Daniel Chen**
+## Persona - Daniel Chen**
 Daniel is a data-driven retail investor working as tech professional, specifically as a data science instructor for MDS, he is an intermediate retail trader with goals of comparing top tech stocks efficiently and making informed long-term investment decisions. He struggles to consolidate information as financial data is scattered across multiple websites and hes overwhelmed by raw financial statements. 
 
-- **Usage scenario**
-Daniel is reviewing his investment portfolio after noticing that most of his holdings are concentrated in large-cap tech stocks. He wants to better understand how the Magnificent 7 stocks compare across valuation, profitability, and performance metrics. Instead of checking multiple financial websites, Alex opens the dashboard. He filters the time range to the past 3 years and examines price performance trends, P/E ratios and revenue growth, market cap comparison, and volatility metrics. The dashboard enables him to make a data-backed decision in minutes instead of hours.
+## Usage scenario
+Daniel is reviewing his investment portfolio after noticing that most of his holdings are concentrated in large-cap tech stocks. He wants to better understand how the Magnificent 7 stocks compare across valuation, profitability, and performance metrics. Instead of checking multiple financial websites, Daniel opens the dashboard. He filters the time range to the past 3 years and examines price performance trends, P/E ratios and revenue growth, market cap comparison, and volatility metrics. The dashboard enables him to make a data-backed decision in minutes instead of hours.
 
-- **User Stories / Jobs To Be Done (JTBD)**
-1 – Performance Comparison:
+## User Stories / Jobs To Be Done (JTBD)
+
+### Performance Comparison:
 
 I am an investor and I want to compare historical stock performance across the Magnificent 7, so that I can identify which companies are leading or lagging over a selected time period, and also compare these stocks to the S&P 500 so I can understand how top tech stocks compare.
 
-User Story 2 – Valuation Analysis
+### Valuation Analysis
 
 As a valuation-focused trader, I want to compare key metrics of booming tech stocks, specfically metrics such as P/E ratio, earnings growth, and revenue growth side-by-side, so that I can assess whether a stock appears overvalued or undervalued relative to the market and to other similar tech stocks.
 
-# Exploratory Data Analysis
+# 4. Exploratory Data Analysis
 
 rubric={reasoning:10}
 
