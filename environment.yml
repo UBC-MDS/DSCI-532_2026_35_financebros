@@ -16,13 +16,22 @@ dependencies:
   - yfinance
   - shiny
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> 744271305506dee9d767af55ecc1841927ed426f
   - plotly
   - anywidget
   - shinywidgets
   - faicons
+<<<<<<< HEAD
 =======
+=======
+>>>>>>> 744271305506dee9d767af55ecc1841927ed426f
   - matplotlib
   - seaborn
   - plotly  
   - numpy
+<<<<<<< HEAD
 >>>>>>> 58cacdfa2a86e546c62db1ed88b347afca471968
+=======
+>>>>>>> 744271305506dee9d767af55ecc1841927ed426f
