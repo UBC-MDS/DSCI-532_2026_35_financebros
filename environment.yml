@@ -1,0 +1,17 @@
+name: DSCI-532_2026_35_financebros
+channels:
+  - conda-forge
+dependencies:
+  - jupyterlab
+  - pandas>=2.0  # Fixed: pandas is currently at 2.x, not 3.x
+  - pip
+  - python>=3.10  # Specify Python version
+  - pytest
+  - pytest-cov
+  - scikit-learn
+  - jupyter_contrib_nbextensions>=0.7.0
+  - ipykernel
+  - nbconvert
+  - nbclient
+  - yfinance
+  - shiny
