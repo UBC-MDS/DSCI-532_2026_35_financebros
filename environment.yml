@@ -15,3 +15,7 @@ dependencies:
   - nbclient
   - yfinance
   - shiny
+  - plotly
+  - anywidget
+  - shinywidgets
+  - faicons
