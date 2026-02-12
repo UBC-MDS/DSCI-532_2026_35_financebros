@@ -53,3 +53,33 @@ Demonstrate that your data can actually support your user stories.
   - Create 1-2 static visualizations or summary tables that directly address the user's task.
 - In your proposal document (this section), briefly explain what the visualization shows and how comparing these values specifically supports the user's decision-making.
   - _(Include the relevant plots or a link to the notebook in this section)._
+
+# 5. App Sketch & Description
+
+![Sketch](../img/sketch.png)
+
+The sketch above shows the overall layout of our dashboard.
+
+### Portfolio Holdings (Top Left)
+Displays summary cards for each stock, including ticker, latest price, and daily return. Users can click a card to update the stock price chart.
+
+### Stock Price Chart (Top Center)
+Shows the selected stock’s price trend over a selected time period. This allows users to quickly analyze short-term and long-term movements.
+
+### Risk vs Return (Top Right)
+A scatter plot comparing annual return (y-axis) and volatility (x-axis) across the selected stocks. This helps users evaluate performance relative to risk.
+
+### Performance Comparison (Middle Left)
+A multi-line chart comparing price trends of the Magnificent 7 stocks over a selected time period.
+
+### Portfolio vs S&P 500 (Middle Center)
+A line chart comparing overall portfolio performance against a benchmark (S&P 500).
+
+### Returns Heatmap (Middle Right)
+A treemap visualization showing daily returns of the Magnificent 7 stocks. Each rectangle represents a stock, where the size of the box reflects its portfolio weight (or market value), and the color indicates its daily return (green for gains, red for losses).
+
+### Risk & Valuation Metrics (Bottom Left)
+A summary table displaying key financial metrics such as P/E ratio, revenue growth, annual return, and volatility for side-by-side comparison.
+
+### Watchlist (Bottom Right)
+A simple list of additional stocks the user is monitoring, showing latest prices and basic indicators.
