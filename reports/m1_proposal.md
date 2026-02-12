@@ -15,7 +15,7 @@ Users can see daily price changes, total performance since purchase, current mar
 
 By putting all this information together in a simple and visual way, the dashboard helps investors understand their portfolio faster and make better decisions with less effort.
 
-### Section 2: Description of the Data
+# Description of the Data
 
 rubric={reasoning:8}
 
@@ -24,9 +24,8 @@ Describe the dataset you finalized in Step 1.
 - **Stats:** Number of rows/columns.
 - **Relevance:** How variables potentially link to the problem.
 
-### Section 3: Research Questions & Usage Scenarios
+# Research Questions & Usage Scenarios
 
-rubric={reasoning:10}
 
 Detail how the audience will interact with the app.
 
@@ -49,7 +48,7 @@ User Story 2 – Valuation Analysis
 
 As a valuation-focused trader, I want to compare key metrics of booming tech stocks, specfically metrics such as P/E ratio, earnings growth, and revenue growth side-by-side, so that I can assess whether a stock appears overvalued or undervalued relative to the market and to other similar tech stocks.
 
-### Section 4: Exploratory Data Analysis
+# Exploratory Data Analysis
 
 rubric={reasoning:10}
 
