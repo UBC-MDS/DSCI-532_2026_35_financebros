@@ -17,4 +17,5 @@ dependencies:
   - shiny
   - matplotlib
   - seaborn
-  - plotly
+  - plotly  
+  - numpy
