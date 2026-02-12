@@ -15,3 +15,7 @@ dependencies:
   - nbclient
   - yfinance
   - shiny
+  - matplotlib
+  - seaborn
+  - plotly  
+  - numpy
