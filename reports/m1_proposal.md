@@ -1,12 +1,19 @@
-### Section 1: Motivation and Purpose
+# Motivation and Purpose
 
-rubric={reasoning:10}
+## Target Audience:
+Our target audience is individual investors who manage their own stock portfolios and want a better way to track how their investments are doing. We are building this dashboard as a helpful financial tool that makes stock information easier to understand and keep track of in one place. 
 
-Briefly explain the "Why":
+## Problem:
+Many investors are busy and do not have time to check their accounts every day. They also do not want to go through each stock one by one to see how it is performing. Financial information is often spread across different websites, which makes it harder to get a clear picture of their portfolio.
 
-- **Target Audience:** Who are they and what role are you embodying?
-- **Problem:** What challenge are they facing?
-- **Solution:** How will your dashboard help them solve it?
+It can be confusing and time-consuming to track both daily price changes and long-term performance since the day they bought the stock. Because of this, investors may find it difficult to make quick and confident decisions.
+
+## Solution: 
+Our dashboard is designed to be a one-stop place where investors can see everything clearly. It includes summary tables and interactive charts so users can easily view both short-term and long-term performance.
+
+Users can see daily price changes, total performance since purchase, current market value, and basic risk information. We also include a watchlist section so they can follow stocks they are interested in.
+
+By putting all this information together in a simple and visual way, the dashboard helps investors understand their portfolio faster and make better decisions with less effort.
 
 ### Section 2: Description of the Data
 
