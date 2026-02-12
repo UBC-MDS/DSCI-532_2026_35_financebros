@@ -15,7 +15,14 @@ dependencies:
   - nbclient
   - yfinance
   - shiny
+<<<<<<< HEAD
   - plotly
   - anywidget
   - shinywidgets
   - faicons
+=======
+  - matplotlib
+  - seaborn
+  - plotly  
+  - numpy
+>>>>>>> 58cacdfa2a86e546c62db1ed88b347afca471968
