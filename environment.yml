@@ -15,9 +15,13 @@ dependencies:
   - nbclient
   - yfinance
   - shiny
+  - plotly
+  - anywidget
+  - shinywidgets
+  - faicons
   - matplotlib
   - seaborn
-  - plotly  
   - numpy
   - pip:
       - curl_cffi
+
