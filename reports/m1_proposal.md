@@ -1,4 +1,4 @@
-# 1. Motivation and Purpose
+# Motivation and Purpose
 
 ## Target Audience:
 Our target audience is individual investors who manage their own stock portfolios and want a better way to track how their investments are doing. We are building this dashboard as a helpful financial tool that makes stock information easier to understand and keep track of in one place. 
@@ -15,16 +15,19 @@ Users can see daily price changes, total performance since purchase, current mar
 
 By putting all this information together in a simple and visual way, the dashboard helps investors understand their portfolio faster and make better decisions with less effort.
 
-# 2. Description of the Data
+# Description of the Data
 
-rubric={reasoning:8}
+The data we will use for our dashboard includes historical stock price data, financial metrics, and market information for the Magnificent 7 stocks (Apple, Microsoft, Amazon, Alphabet, Meta, Nvidia, and Tesla). We will source this data from Yahoo Finance, which provides comprehensive historical data on stock prices, trading volumes, and key financial indicators. We will include benchmark data for the S&P 500 to allow users to compare their portfolio performance against the broader market, and finally, we will also include data covering market cap, P/E ratios, Dividend yield and revenue growth.
 
-Describe the dataset you finalized in Step 1.
+Our primary dataset will consist of daily close stock prices for the magnificent 7 stocks. This dataset contains 7 columns (one for each stock) and approximately 2541 rows, covering the past 10 years of trading data. Each row represents a trading day, and the columns represent the closing price of each stock on that day. This data will allow us to analyze price trends, calculate returns, and visualize performance over time.
 
-- **Stats:** Number of rows/columns.
-- **Relevance:** How variables potentially link to the problem.
+Our metrics dataset (containing market cap, P/E ratios, dividend yield, and revenue growth) contains 6 columns, and 7 rows of data. This will be combined with the price data to provide a comprehensive view of each stock's performance.
 
-# 3. Research Questions & Usage Scenarios
+The data on the S&P 500 will also include daily closing prices for the same time period, containing 2516 rows,allowing us to calculate the overall performance of the benchmark and compare it to the performance of the Magnificent 7 stocks.
+
+Finally, we will also include a watchlist dataset that contains the closing price for additional stocks that users may want to monitor. This dataset contains 2515 rows and columns comprising stocks AMD, MU, NFLX. 
+
+# Research Questions & Usage Scenarios
 
 rubric={reasoning:10}
 
