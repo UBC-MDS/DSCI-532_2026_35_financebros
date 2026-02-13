@@ -344,3 +344,6 @@ with ui.hold():
 
 #css
 # ui.include_css(Path(__file__).parent / "styles.css")
+
+# # Create app
+# app = App(app_ui, server)
