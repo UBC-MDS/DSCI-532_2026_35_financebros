@@ -61,7 +61,7 @@ project and everybody has limited time.
 Ready to contribute? Here's how to set up DSCI524_Group36_MLpipeline for
 local development.
 
-1. Fork the https://github.com/UBC-MDS/dsci524_group36_mlpipeline
+1. Fork the https://github.com/UBC-MDS/DSCI-532_2026_35_financebros
    repository on GitHub.
 2. Clone your fork locally (*if you want to work locally*)
 
