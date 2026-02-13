@@ -26,14 +26,6 @@ Describe the dataset you finalized in Step 1.
 
 # 3. Research Questions & Usage Scenarios
 
-rubric={reasoning:10}
-
-Detail how the audience will interact with the app.
-
-- **Persona:** Brief description of a user.
-- **Usage Scenario** create a narrative describing user needs and context.
-- **User Stories / JTBD:** Provide **at least 3** User Stories or Job Stories that outline specific tasks the user needs to perform.
-
 - **Persona - Daniel Chen**
 Daniel is a data-driven retail investor working as tech professional, specifically as a data science instructor for MDS, he is an intermediate retail trader with goals of comparing top tech stocks efficiently and making informed long-term investment decisions. He struggles to consolidate information as financial data is scattered across multiple websites and hes overwhelmed by raw financial statements. He has been losing consistently and wants to trace where he went wrong.
 
@@ -45,17 +37,16 @@ User story 1 – Performance Comparison: As an investor and I want to compare hi
 
 User Story 2 – Valuation Analysis: As a valuation-focused trader, I want to compare key metrics of booming tech stocks, specfically metrics such as P/E ratio, earnings growth, and revenue growth side-by-side, so that I can assess whether a stock appears overvalued or undervalued relative to the market and to other similar tech stocks.
 
+User story 3 - Reporting: As a banker, I want to display charts and graphs to the bank customers looking for investing help. These visuals should be able to display numerical information and be interpretable by the layman. I want to show them how the magnificent 7's ROI and risk compare to my bank's ETFs and other securities.
+
 # 4. Exploratory Data Analysis
 
-rubric={reasoning:10}
+User Story 2 – Valuation Analysis. 
 
-Demonstrate that your data can actually support your user stories.
+![trailingPE](../img/trailingPE.png)
+![revenue](../img/revenue.png)
 
-- Select **one** of your User Stories/JTBD from Section 3.
-- Create a Jupyter notebook in the `notebooks/` folder (e.g., `notebooks/eda_analysis.ipynb`).
-  - Create 1-2 static visualizations or summary tables that directly address the user's task.
-- In your proposal document (this section), briefly explain what the visualization shows and how comparing these values specifically supports the user's decision-making.
-  - _(Include the relevant plots or a link to the notebook in this section)._
+These graphs aid in decision making as it reveals information about valuation vs. profit and also about business activity and growth. Trailing P/E is the current share price divided by earnings per share over the last 12 months. It indicates how many dollars investors pay for each dollar of past earnings (e.g., P/E 20 = paying 20 times last year’s earnings). It also shows market expectations, as high trailing P/E can mean the market expects strong future growth, or that the stock is overvalued, in the graph, Tesla has a much higher P/E than others. The other graph shows quartly revenue growth, it is the sales the company generates in a three‑month period, and quarterly revenue growth is the percentage change versus a prior quarter or the same quarter last year. It indicates business activity and demand rising revenue usually means more customers, higher volumes, or better pricing; falling revenue can signal weakening demand or competitive pressure. As well as growth momentum, as consistent positive quarterly revenue growth points to expanding operations and can support a higher valuation; volatile or negative growth raises questions about sustainability, which can indicate a lot given how high Nvidia is compared to other stocks in this graph. The trader can make a decision based on their risk tolerance and investment strategies.
 
 # 5. App Sketch & Description
 
