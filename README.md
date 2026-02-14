@@ -25,7 +25,7 @@ To set up and run the dashboard locally:
 
 4. **Activate the environment:**
    ```bash
-   conda activate financebros
+   conda activate DSCI-532_2026_35_financebros
    ```
 
 5. **Run the Shiny app:**
