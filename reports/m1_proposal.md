@@ -46,8 +46,8 @@ User story 3 - Reporting: As a banker, I want to display charts and graphs to th
 
 User Story 2 – Valuation Analysis. 
 
-![trailingPE](../img/trailingPE.png)
-![revenue](../img/revenue.png)
+![trailingPE](../img/pe_ratio.png)
+![revenue](../img/revenue_growth.png)
 
 These graphs aid in decision making as it reveals information about valuation vs. profit and also about business activity and growth. Trailing P/E is the current share price divided by earnings per share over the last 12 months. It indicates how many dollars investors pay for each dollar of past earnings (e.g., P/E 20 = paying 20 times last year’s earnings). It also shows market expectations, as high trailing P/E can mean the market expects strong future growth, or that the stock is overvalued, in the graph, Tesla has a much higher P/E than others. The other graph shows quartly revenue growth, it is the sales the company generates in a three‑month period, and quarterly revenue growth is the percentage change versus a prior quarter or the same quarter last year. It indicates business activity and demand rising revenue usually means more customers, higher volumes, or better pricing; falling revenue can signal weakening demand or competitive pressure. As well as growth momentum, as consistent positive quarterly revenue growth points to expanding operations and can support a higher valuation; volatile or negative growth raises questions about sustainability, which can indicate a lot given how high Nvidia is compared to other stocks in this graph. The trader can make a decision based on their risk tolerance and investment strategies.
 
