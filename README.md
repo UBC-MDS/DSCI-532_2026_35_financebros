@@ -3,8 +3,8 @@ Dashboard for stonks
 
 ## Live Demo
 
-- **Stable:** https://019c9677-f2df-851a-2b33-cbadb90bd565.share.connect.posit.cloud/
-- **Preview:** https://019c9678-ed95-a69e-edfc-535edfb1644a.share.connect.posit.cloud/
+- **Stable:** https://019c96fb-7645-b17f-61b0-46a58d974625.share.connect.posit.cloud/
+- **Preview:** https://019c96fc-ef4e-2932-2355-311a3030aeb5.share.connect.posit.cloud/
 
 ## About
 
