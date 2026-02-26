@@ -4,7 +4,7 @@ Review your M1 job stories in light of your deployment setup and any new insight
 
 | #   | Job Story                       | Status         | Notes                         |
 | --- | ------------------------------- | -------------- | ----------------------------- |
-| 1   | When I … I want to … so I can … | ✅ Implemented |                               |
+| 1   | Performance Comparison: As an investor and I want to compare historical stock performance across the Magnificent 7, so that I can identify which companies are leading or lagging over a selected time period, and also compare these stocks to the S&P 500 so I can understand how top tech stocks compare. | ✅ Implemented | No changes needed, accounted for by components 3 and 4                              |
 | 2   | When I … I want to … so I can … | 🔄 Revised     | Changed from X to Y because … |
 | 3   | When I … I want to … so I can … | ⏳ Pending M3  |                               |
 
