@@ -30,7 +30,7 @@ This inventory is our implementation checklist for Phase 3+ (inputs → reactive
 
 ### Risk & Valuation Metrics Table (Bottom-Left)
 
-- Displays all 7 Magnificent 7 stocks as rows.
+- Displays all 7 Magnificent stocks as rows.
 - Columns include:
   - Ticker  
   - Date (latest available per ticker)  
@@ -81,3 +81,4 @@ flowchart TD
   T[/input_ticker/] --> S
   M{{metrics_table_df}} --> G([tbl_stock_metrics])
   T --> G
+```
