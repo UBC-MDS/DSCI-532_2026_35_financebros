@@ -153,8 +153,48 @@ with ui.layout_columns(col_widths=[1, 1, 1], row_heights="auto"):
             others greyed out. Reacts to: dropdown + date range.
             Data: All portfolio stocks from close.csv.
             """
-            pass
-            return go.Figure()
+
+            df = get_filtered_close().copy()
+            ticker = input.ticker()
+
+            if df.empty:
+                return go.Figure()
+
+            df = df.set_index("Date")
+
+            #normalize to 100 at start since the raw prices arent comparable in the same graph, prices are too differentr
+            normalized = df / df.iloc[0] * 100
+
+            fig = go.Figure()
+
+            for col in normalized.columns:
+                if col == ticker:
+                    fig.add_trace(
+                        go.Scatter(
+                            x=normalized.index, y=normalized[col], mode="lines",
+                            name=col, line=dict(width=3)
+                        )
+                    )
+                else:
+                    fig.add_trace(
+                        go.Scatter(
+                            x=normalized.index, y=normalized[col], mode="lines",
+                            name=col, line=dict(color="lightgray", width=1),
+                            opacity=0.6
+                        )
+                    )
+
+            fig.update_layout(
+                template="plotly_dark",
+                yaxis_title="Normalized Performance (Base = 100)",
+                xaxis_title="Date",
+                showlegend=True,
+                margin=dict(l=10, r=10, t=10, b=10),
+            )
+
+            return fig
+            # pass
+            # return go.Figure()
 
     # 4. S&P 500 Comparison
     with ui.card(full_screen=True):
@@ -167,8 +207,66 @@ with ui.layout_columns(col_widths=[1, 1, 1], row_heights="auto"):
             Chart comparing selected stock vs SPY (S&P 500). Reacts to: dropdown + date range.
             Data: Selected stock from close.csv + SPY from spy.csv.
             """
-            pass
-            return go.Figure()
+            ticker = input.ticker()
+
+            stock_df = get_filtered_close().copy()
+            dates = input.dates()
+
+            if stock_df.empty:
+                return go.Figure()
+
+            #filter SPY by same date range
+            spy_filtered = spy_df[
+                (spy_df["Date"] >= pd.Timestamp(dates[0])) &
+                (spy_df["Date"] <= pd.Timestamp(dates[1]))
+            ].copy()
+
+            stock_df = stock_df.set_index("Date")
+            spy_filtered = spy_filtered.set_index("Date")
+
+            if ticker not in stock_df.columns:
+                return go.Figure()
+
+            stock_series = stock_df[ticker]
+            spy_series = spy_filtered["SPY"]
+
+            #like 3 above, normalize both to 100 
+            stock_norm = stock_series / stock_series.iloc[0] * 100
+            spy_norm = spy_series / spy_series.iloc[0] * 100
+
+            fig = go.Figure()
+
+            fig.add_trace(
+                go.Scatter(
+                    x=stock_norm.index,
+                    y=stock_norm,
+                    mode="lines",
+                    name=ticker,
+                    line=dict(width=3),
+                )
+            )
+
+            fig.add_trace(
+                go.Scatter(
+                    x=spy_norm.index,
+                    y=spy_norm,
+                    mode="lines",
+                    name="S&P 500 (SPY)",
+                    line=dict(color="orange", width=2),
+                )
+            )
+
+            fig.update_layout(
+                template="plotly_dark",
+                yaxis_title="Normalized Performance (Base = 100)",
+                xaxis_title="Date",
+                margin=dict(l=10, r=10, t=10, b=10),
+            )
+
+            return fig
+
+            # pass
+            # return go.Figure()
 
     # 7. Portfolio Treemap
     with ui.card(full_screen=True):
