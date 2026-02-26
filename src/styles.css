@@ -1,7 +1,139 @@
+/* Finviz-inspired Stock Visualization Theme */
+
 :root {
-  --bslib-sidebar-main-bg: #f8f8f8;
+  /* Finviz-style color palette */
+  --finviz-bg-dark: #131722;
+  --finviz-bg-card: #1e222d;
+  --finviz-bg-sidebar: #1e222d;
+  --finviz-text: #d1d4dc;
+  --finviz-text-muted: #787b86;
+  --finviz-green: #44bb70;
+  --finviz-red: #d62728;
+  --finviz-border: #2a2e39;
+  --finviz-accent: #2962ff;
 }
 
+/* Dark theme base */
+body {
+  background-color: var(--finviz-bg-dark) !important;
+  color: var(--finviz-text) !important;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    "Helvetica Neue", Arial, "Noto Sans", sans-serif !important;
+}
+
+/* Sidebar styling */
+.bslib-sidebar-layout .bslib-sidebar-main,
+.bslib-sidebar-layout .bslib-sidebar {
+  background-color: var(--finviz-bg-sidebar) !important;
+}
+
+.bslib-sidebar-layout .bslib-sidebar {
+  border-right: 1px solid var(--finviz-border) !important;
+}
+
+/* Card styling - finviz data-dense look */
+.bslib-card {
+  background-color: var(--finviz-bg-card) !important;
+  border: 1px solid var(--finviz-border) !important;
+  border-radius: 4px !important;
+}
+
+.bslib-card-header {
+  background-color: rgba(42, 46, 57, 0.5) !important;
+  border-bottom: 1px solid var(--finviz-border) !important;
+  color: var(--finviz-text) !important;
+  font-weight: 600 !important;
+}
+
+/* Value boxes and key metrics - bold emphasis */
+.bslib-value-box {
+  background-color: var(--finviz-bg-card) !important;
+  border: 1px solid var(--finviz-border) !important;
+}
+
+.bslib-value-box .value-box-value {
+  font-weight: 700 !important;
+  color: var(--finviz-text) !important;
+}
+
+/* Positive/negative color coding */
+.text-success,
+.positive,
+.up {
+  color: var(--finviz-green) !important;
+}
+
+.text-danger,
+.negative,
+.down {
+  color: var(--finviz-red) !important;
+}
+
+/* Table styling - finviz ticker table aesthetic */
+.dataTables_wrapper,
+table.dataTable {
+  background-color: var(--finviz-bg-card) !important;
+  color: var(--finviz-text) !important;
+}
+
+table.dataTable thead th {
+  background-color: rgba(42, 46, 57, 0.8) !important;
+  color: var(--finviz-text) !important;
+  border-bottom: 1px solid var(--finviz-border) !important;
+}
+
+table.dataTable tbody td {
+  border-bottom: 1px solid var(--finviz-border) !important;
+  color: var(--finviz-text) !important;
+}
+
+table.dataTable tbody tr:hover {
+  background-color: rgba(41, 98, 255, 0.1) !important;
+}
+
+/* Form controls */
+.form-control,
+.form-select,
+input[type="text"],
+select {
+  background-color: var(--finviz-bg-dark) !important;
+  color: var(--finviz-text) !important;
+  border: 1px solid var(--finviz-border) !important;
+}
+
+.form-control:focus,
+.form-select:focus {
+  border-color: var(--finviz-accent) !important;
+  box-shadow: 0 0 0 0.2rem rgba(41, 98, 255, 0.25) !important;
+}
+
+/* Labels */
+label {
+  color: var(--finviz-text) !important;
+}
+
+/* Plotly chart theming */
 .plotly .modebar-container {
   display: none !important;
+}
+
+.js-plotly-plot .plotly .main-svg {
+  background-color: transparent !important;
+}
+
+/* Switch/toggle styling */
+.form-check-input {
+  background-color: var(--finviz-bg-dark) !important;
+  border-color: var(--finviz-border) !important;
+}
+
+.form-check-input:checked {
+  background-color: var(--finviz-green) !important;
+  border-color: var(--finviz-green) !important;
+}
+
+/* Numeric display - professional font for financial data */
+.fs-3,
+.fw-bold {
+  font-variant-numeric: tabular-nums !important;
 }

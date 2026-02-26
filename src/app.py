@@ -1,181 +1,40 @@
-# from pathlib import Path
-
-# import pandas as pd
-# import plotly.graph_objects as go
-# import yfinance as yf
-# from faicons import icon_svg
-# from shiny import reactive
-# from shiny.express import input, render, ui
-# from shiny.ui import output_ui
-# from shinywidgets import render_plotly
-# from stocks import stocks
-
-# # Default to the last 6 months
-# end = pd.Timestamp.now()
-# start = end - pd.Timedelta(weeks=26)
-
-
-# ui.page_opts(title="Stock explorer", fillable=True)
-
-# with ui.sidebar():
-#     ui.input_selectize("ticker", "Select Stocks", choices=stocks, selected="AAPL")
-#     ui.input_date_range("dates", "Select dates", start=start, end=end)
-
-
-# with ui.layout_column_wrap(fill=False):
-#     with ui.value_box(showcase=icon_svg("dollar-sign")):
-#         "Current Price"
-
-#         @render.ui
-#         def price():
-#             close = get_data()["Close"]
-#             return f"{close.iloc[-1]:.2f}"
-
-#     with ui.value_box(showcase=output_ui("change_icon")):
-#         "Change"
-
-#         @render.ui
-#         def change():
-#             return f"${get_change():.2f}"
-
-#     with ui.value_box(showcase=icon_svg("percent")):
-#         "Percent Change"
-
-#         @render.ui
-#         def change_percent():
-#             return f"{get_change_percent():.2f}%"
-
-
-# with ui.layout_columns(col_widths=[9, 3]):
-#     with ui.card(full_screen=True):
-#         ui.card_header("Price history")
-
-#         @render_plotly
-#         def price_history():
-#             df = get_data().reset_index()
-#             fig = go.Figure(
-#                 data=[
-#                     go.Candlestick(
-#                         x=df["Date"],
-#                         open=df["Open"],
-#                         high=df["High"],
-#                         low=df["Low"],
-#                         close=df["Close"],
-#                         increasing_line_color="#44bb70",
-#                         decreasing_line_color="#040548",
-#                         name=input.ticker(),
-#                     )
-#                 ]
-#             )
-#             df["SMA"] = df["Close"].rolling(window=20).mean()
-#             fig.add_scatter(
-#                 x=df["Date"],
-#                 y=df["SMA"],
-#                 mode="lines",
-#                 name="SMA (20)",
-#                 line={"color": "orange", "dash": "dash"},
-#             )
-#             fig.update_layout(
-#                 hovermode="x unified",
-#                 legend={
-#                     "orientation": "h",
-#                     "yanchor": "top",
-#                     "y": 1,
-#                     "xanchor": "right",
-#                     "x": 1,
-#                 },
-#                 paper_bgcolor="rgba(0,0,0,0)",
-#                 plot_bgcolor="rgba(0,0,0,0)",
-#             )
-#             return fig
-
-#     with ui.card():
-#         ui.card_header("Latest data")
-
-#         @render.data_frame
-#         def latest_data():
-#             x = get_data()[:1].T.reset_index()
-#             x.columns = ["Category", "Value"]
-#             x["Value"] = x["Value"].apply(lambda v: f"{v:.1f}")
-#             return x
-
-
-# ui.include_css(Path(__file__).parent / "styles.css")
-
-
-# @reactive.calc
-# def get_ticker():
-#     return yf.Ticker(input.ticker())
-
-
-# @reactive.calc
-# def get_data():
-#     dates = input.dates()
-#     return get_ticker().history(start=dates[0], end=dates[1])
-
-
-# @reactive.calc
-# def get_change():
-#     close = get_data()["Close"]
-#     if len(close) < 2:
-#         return 0.0
-#     return close.iloc[-1] - close.iloc[-2]
-
-
-# @reactive.calc
-# def get_change_percent():
-#     close = get_data()["Close"]
-#     if len(close) < 2:
-#         return 0.0
-#     change = close.iloc[-1] - close.iloc[-2]
-#     return change / close.iloc[-2] * 100
-
-
-# with ui.hold():
-
-#     @render.ui
-#     def change_icon():
-#         change = get_change()
-#         icon = icon_svg("arrow-up" if change >= 0 else "arrow-down")
-#         icon.add_class(f"text-{('success' if change >= 0 else 'danger')}")
-#         return icon
-
-
-
-
-
+"""
+Stock Visualization Dashboard - Magnificent 7 Portfolio
+Finviz-inspired design with 8 visualization components.
+"""
 
 from pathlib import Path
 
 import pandas as pd
 import plotly.graph_objects as go
-import yfinance as yf
-from faicons import icon_svg
 from shiny import reactive
 from shiny.express import input, render, ui
-from shiny.ui import output_ui
 from shinywidgets import render_plotly
 
+from stocks import stocks, wishlist as wishlist_dict
 
-# Magnificent 7 Stocks
-stocks = {
-    "AAPL": "Apple",
-    "MSFT": "Microsoft",
-    "GOOGL": "Alphabet",
-    "AMZN": "Amazon",
-    "META": "Meta",
-    "NVDA": "Nvidia",
-    "TSLA": "Tesla",
-}
+# -----------------------------------------------------------------------------
+# Data Loading - Load CSV files once at startup
+# -----------------------------------------------------------------------------
+DATA_DIR = Path(__file__).parent.parent / "data"
 
-# Default: last 6 months
-end = pd.Timestamp.now()
-start = end - pd.Timedelta(weeks=26)
+close_df = pd.read_csv(DATA_DIR / "close.csv", parse_dates=["Date"])
+metric_df = pd.read_csv(DATA_DIR / "metric.csv")
+spy_df = pd.read_csv(DATA_DIR / "spy.csv", parse_dates=["Date"])
+wishlist_df = pd.read_csv(DATA_DIR / "wishlist.csv", parse_dates=["Date"])
 
+# Date range from close.csv
+DATE_MIN = close_df["Date"].min()
+DATE_MAX = close_df["Date"].max()
+
+# -----------------------------------------------------------------------------
+# Page Setup
+# -----------------------------------------------------------------------------
 ui.page_opts(title="Magnificent 7 Stock Explorer", fillable=True)
 
-
-# Sidebar
+# -----------------------------------------------------------------------------
+# Sidebar - Stock dropdown and date range
+# -----------------------------------------------------------------------------
 with ui.sidebar():
     ui.input_selectize(
         "ticker",
@@ -183,167 +42,186 @@ with ui.sidebar():
         choices=stocks,
         selected="AAPL",
     )
-
     ui.input_date_range(
         "dates",
-        "Select dates",
-        start=start,
-        end=end,
+        "Select Date Range",
+        start=DATE_MIN,
+        end=DATE_MAX,
+        min=DATE_MIN,
+        max=DATE_MAX,
     )
 
-# Reactive Storage 
-stock_data = reactive.Value(pd.DataFrame())
+# -----------------------------------------------------------------------------
+# Reactive Data Calculations
+# -----------------------------------------------------------------------------
 
-# Fetch Data ONCE per change
-@reactive.effect
-def _():
+
+@reactive.calc
+def get_filtered_close():
+    """Filter close.csv by selected date range."""
     dates = input.dates()
+    mask = (close_df["Date"] >= pd.Timestamp(dates[0])) & (
+        close_df["Date"] <= pd.Timestamp(dates[1])
+    )
+    return close_df.loc[mask].copy()
+
+
+@reactive.calc
+def get_current_price():
+    """Get most recent price for selected stock (from full close.csv, not date range)."""
     ticker = input.ticker()
-
-    try:
-        df = yf.download(
-            ticker,
-            start=dates[0],
-            end=dates[1],
-            progress=False,
-            threads=False,
-        )
-        stock_data.set(df)
-    except Exception:
-        stock_data.set(pd.DataFrame())
-
-
-# Derived Metrics
-@reactive.calc
-def get_change():
-    df = stock_data()
-    if df.empty or len(df) < 2:
-        return 0.0
-    close = df["Close"]
-    return close.iloc[-1] - close.iloc[-2]
+    if ticker not in close_df.columns:
+        return None
+    return float(close_df[ticker].iloc[-1])
 
 
 @reactive.calc
-def get_change_percent():
-    df = stock_data()
-    if df.empty or len(df) < 2:
-        return 0.0
-    close = df["Close"]
-    change = close.iloc[-1] - close.iloc[-2]
-    return (change / close.iloc[-2]) * 100
+def get_selected_stock_series():
+    """Get price series for selected stock within date range."""
+    ticker = input.ticker()
+    df = get_filtered_close()
+    if ticker not in df.columns:
+        return pd.Series(dtype=float)
+    return df.set_index("Date")[ticker]
 
 
-# Value Boxes
-with ui.layout_column_wrap(fill=False):
+# -----------------------------------------------------------------------------
+# Layout - 3-column grid matching sketch.png
+# Row 1: 1 (Current Price), 2 (Stock Chart), 6 (Risk-Return)
+# Row 2: 3 (Performance), 4 (S&P 500), 7 (Treemap)
+# Row 3: 5 (Metrics Table), 8 (Watchlist)
+# -----------------------------------------------------------------------------
+with ui.layout_columns(col_widths=[1, 1, 1], row_heights="auto"):
 
-    with ui.value_box(showcase=icon_svg("dollar-sign")):
-        "Current Price"
-
-        @render.ui
-        def price():
-            df = stock_data()
-            if df.empty:
-                return "Data unavailable"
-            return f"${df['Close'].iloc[-1]:.2f}"
-
-    with ui.value_box(showcase=output_ui("change_icon")):
-        "Change"
+    # 1. Current Price Display
+    with ui.card():
+        ui.card_header("1. Current Price")
 
         @render.ui
-        def change():
-            return f"${get_change():.2f}"
+        def render_current_price():
+            """
+            1. Current Price Display.
+            Display current stock price. Reacts to dropdown only (not date range).
+            Uses the most recent price from close.csv regardless of selected date range.
+            Data: Last row from close.csv for selected stock.
+            """
+            pass
+            return ui.div("—", class_="text-muted")
 
-    with ui.value_box(showcase=icon_svg("percent")):
-        "Percent Change"
-
-        @render.ui
-        def change_percent():
-            return f"{get_change_percent():.2f}%"
-
-
-# Charts & Table
-with ui.layout_columns(col_widths=[9, 3]):
-
+    # 2. Stock Price Chart
     with ui.card(full_screen=True):
-        ui.card_header("Price History")
+        ui.card_header("2. Stock Price Chart")
 
         @render_plotly
-        def price_history():
-            df = stock_data()
+        def render_stock_price_chart():
+            """
+            2. Stock Price Chart.
+            Line graph of stock price from start to end of selected date range.
+            Reacts to: dropdown + date range.
+            Data: Filtered close.csv for selected stock and date range.
+            """
+            pass
+            return go.Figure()
 
-            if df.empty:
-                return go.Figure()
+    # 6. Risk-Return Scatter Plot
+    with ui.card(full_screen=True):
+        ui.card_header("6. Risk-Return Scatter")
 
-            df = df.reset_index()
+        @render_plotly
+        def render_risk_return_scatter():
+            """
+            6. Risk-Return Scatter Plot.
+            Scatter plot of risk (volatility) vs return for all portfolio stocks.
+            Selected stock highlighted. Reacts to: dropdown only (uses selected date range).
+            Data: Calculate from close.csv; highlight selected stock.
+            """
+            pass
+            return go.Figure()
 
-            fig = go.Figure(
-                data=[
-                    go.Candlestick(
-                        x=df["Date"],
-                        open=df["Open"],
-                        high=df["High"],
-                        low=df["Low"],
-                        close=df["Close"],
-                        increasing_line_color="#44bb70",
-                        decreasing_line_color="#d62728",
-                        name=input.ticker(),
-                    )
-                ]
-            )
 
-            # Add 20-day SMA
-            df["SMA"] = df["Close"].rolling(20).mean()
+with ui.layout_columns(col_widths=[1, 1, 1], row_heights="auto"):
 
-            fig.add_scatter(
-                x=df["Date"],
-                y=df["SMA"],
-                mode="lines",
-                name="SMA (20)",
-                line=dict(color="orange", dash="dash"),
-            )
+    # 3. Performance Comparison
+    with ui.card(full_screen=True):
+        ui.card_header("3. Performance Comparison")
 
-            fig.update_layout(
-                hovermode="x unified",
-                legend=dict(
-                    orientation="h",
-                    yanchor="top",
-                    y=1,
-                    xanchor="right",
-                    x=1,
-                ),
-                paper_bgcolor="rgba(0,0,0,0)",
-                plot_bgcolor="rgba(0,0,0,0)",
-            )
+        @render_plotly
+        def render_performance_comparison():
+            """
+            3. Performance Comparison.
+            Multi-line chart comparing all portfolio stocks. Selected stock highlighted,
+            others greyed out. Reacts to: dropdown + date range.
+            Data: All portfolio stocks from close.csv.
+            """
+            pass
+            return go.Figure()
 
-            return fig
+    # 4. S&P 500 Comparison
+    with ui.card(full_screen=True):
+        ui.card_header("4. S&P 500 Comparison")
 
+        @render_plotly
+        def render_sp500_comparison():
+            """
+            4. S&P 500 Comparison.
+            Chart comparing selected stock vs SPY (S&P 500). Reacts to: dropdown + date range.
+            Data: Selected stock from close.csv + SPY from spy.csv.
+            """
+            pass
+            return go.Figure()
+
+    # 7. Portfolio Treemap
+    with ui.card(full_screen=True):
+        ui.card_header("7. Portfolio Treemap")
+
+        @render_plotly
+        def render_portfolio_treemap():
+            """
+            7. Portfolio Treemap.
+            Treemap of portfolio sized by market cap. Selected stock highlighted.
+            Reacts to: dropdown only. Data: MarketCap from metric.csv.
+            """
+            pass
+            return go.Figure()
+
+
+with ui.layout_columns(col_widths=[1, 1], row_heights="auto"):
+
+    # 5. Stock Metrics Table
     with ui.card():
-        ui.card_header("Latest Data")
+        ui.card_header("5. Stock Metrics Table")
 
         @render.data_frame
-        def latest_data():
-            df = stock_data()
+        def render_stock_metrics_table():
+            """
+            5. Stock Metrics Table.
+            Table with Stock name, P/E ratio, Revenue growth, Annual return (placeholder),
+            Volatility (placeholder). Reacts to: dropdown only.
+            Data: metric.csv for P/E and Revenue Growth.
+            """
+            pass
+            return pd.DataFrame()
 
-            if df.empty:
-                return pd.DataFrame()
+    # 8. Watchlist Display
+    with ui.card():
+        ui.card_header("8. Watchlist")
+        ui.input_switch(
+            "watchlist_toggle", "Show as $ (dollar) / % (percent)", value=False
+        )
 
-            latest = df.tail(1).T.reset_index()
-            latest.columns = ["Category", "Value"]
-            latest["Value"] = latest["Value"].apply(lambda v: f"{v:.2f}")
+        @render.data_frame
+        def render_watchlist():
+            """
+            8. Watchlist Display.
+            Table of watchlist stocks (from wishlist.csv) with Symbol, Company,
+            and Change (colored red/green). Global toggle for percentage vs dollar.
+            Reacts to: neither dropdown nor date range.
+            """
+            pass
+            return pd.DataFrame()
 
-            return latest
 
-with ui.hold():
-
-    @render.ui
-    def change_icon():
-        change = get_change()
-        icon = icon_svg("arrow-up" if change >= 0 else "arrow-down")
-        icon.add_class(f"text-{('success' if change >= 0 else 'danger')}")
-        return icon
-
-#css
-# ui.include_css(Path(__file__).parent / "styles.css")
-
-# # Create app
-# app = App(app_ui, server)
+# -----------------------------------------------------------------------------
+# Apply finviz-inspired styles
+# -----------------------------------------------------------------------------
+ui.include_css(Path(__file__).parent / "styles.css")
