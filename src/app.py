@@ -185,10 +185,10 @@ with ui.layout_columns(col_widths=[1, 1, 1], row_heights="auto"):
             return go.Figure()
 
 
-with ui.layout_columns(col_widths=[1, 1], row_heights="auto"):
+with ui.layout_columns(col_widths=[4, 1]):
 
     # 5. Stock Metrics Table
-    with ui.card():
+    with ui.card(style="width: 100%; height: 360px;"):
         ui.card_header("5. Stock Metrics Table")
 
         @render.data_frame
@@ -199,8 +199,7 @@ with ui.layout_columns(col_widths=[1, 1], row_heights="auto"):
             Volatility (placeholder). Reacts to: dropdown only.
             Data: metric.csv for P/E and Revenue Growth.
             """
-            pass
-            return pd.DataFrame()
+            return metric_df
 
     # 8. Watchlist Display
     with ui.card():
@@ -224,4 +223,4 @@ with ui.layout_columns(col_widths=[1, 1], row_heights="auto"):
 # -----------------------------------------------------------------------------
 # Apply finviz-inspired styles
 # -----------------------------------------------------------------------------
-ui.include_css(Path(__file__).parent / "styles.css")
+# ui.include_css(Path(__file__).parent / "styles.css")
