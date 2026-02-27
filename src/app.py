@@ -6,10 +6,11 @@ Finviz-inspired design with 8 visualization components.
 from pathlib import Path
 
 import pandas as pd
+import numpy as np
 import plotly.graph_objects as go
 from shiny import reactive
 from shiny.express import input, render, ui
-from shinywidgets import render_plotly
+from shinywidgets import render_plotly, output_widget
 
 from stocks import stocks, wishlist as wishlist_dict
 
@@ -52,6 +53,12 @@ with ui.sidebar():
         format="yyyy-mm-dd",
         separator=" - ",
     )
+    ui.input_select(
+        "rr_period",
+        "Risk/Return Window",
+        choices=["Full", "1Y", "5Y", "10Y"],
+        selected="Full",
+    )
 
 # -----------------------------------------------------------------------------
 # Reactive Data Calculations
@@ -86,6 +93,75 @@ def get_selected_stock_series():
         return pd.Series(dtype=float)
     return df.set_index("Date")[ticker]
 
+RR_TICKERS = [c for c in close_df.columns if c != "Date"]
+
+
+def _padded_range(vals: pd.Series, pad_frac: float = 0.15):
+    vals = pd.to_numeric(vals, errors="coerce").dropna()
+    if vals.empty:
+        return None
+    vmin = float(vals.min())
+    vmax = float(vals.max())
+    if np.isclose(vmin, vmax):
+        pad = abs(vmin) * pad_frac if vmin != 0 else 0.01
+        return (vmin - pad, vmax + pad)
+    pad = (vmax - vmin) * pad_frac
+    return (vmin - pad, vmax + pad)
+
+
+@reactive.calc
+def analysis_close():
+    """
+    Filters close.csv to selected date range, then applies rr window (Full/1Y/5Y/10Y)
+    using the most recent N years inside the selected date range.
+    """
+    d0, d1 = input.dates()
+    df = close_df[
+        (close_df["Date"] >= pd.Timestamp(d0))
+        & (close_df["Date"] <= pd.Timestamp(d1))
+    ].copy()
+    df = df.sort_values("Date")
+
+    if df.empty:
+        return df
+
+    period = input.rr_period()
+    if period == "Full":
+        return df
+
+    years = {"1Y": 1, "5Y": 5, "10Y": 10}[period]
+    end_date = df["Date"].max()
+    start_date = end_date - pd.DateOffset(years=years)
+    return df[df["Date"] >= start_date].copy()
+
+
+@reactive.calc
+def risk_return_df():
+    """
+    From analysis_close(), compute annualized return + annualized volatility per ticker.
+    """
+    df = analysis_close()
+    if df.empty:
+        return pd.DataFrame(columns=["Ticker", "AnnReturn", "AnnVol"])
+
+    prices = df.set_index("Date")[RR_TICKERS].astype(float)
+    rets = prices.pct_change().dropna(how="all")
+
+    if rets.empty:
+        return pd.DataFrame(columns=["Ticker", "AnnReturn", "AnnVol"])
+
+    mean_daily = rets.mean()
+    std_daily = rets.std()
+
+    out = pd.DataFrame(
+        {
+            "Ticker": mean_daily.index,
+            "AnnReturn": mean_daily.values * 252,
+            "AnnVol": std_daily.values * np.sqrt(252),
+        }
+    ).dropna()
+
+    return out.reset_index(drop=True)
 
 # -----------------------------------------------------------------------------
 # Layout - 3-column grid matching sketch.png
@@ -127,19 +203,84 @@ with ui.layout_columns(col_widths={"sm": (5, 5, 2)}, row_heights="auto"):
 
     # 6. Risk-Return Scatter Plot
     with ui.card(full_screen=True):
-        ui.card_header("6. Risk-Return Scatter")
+        ui.card_header("6. Risk-Return Scatshiny run --reload src/app.pyter")
+        output_widget("rr_plot")
 
         @render_plotly
-        def render_risk_return_scatter():
-            """
-            6. Risk-Return Scatter Plot.
-            Scatter plot of risk (volatility) vs return for all portfolio stocks.
-            Selected stock highlighted. Reacts to: dropdown only (uses selected date range).
-            Data: Calculate from close.csv; highlight selected stock.
-            """
-            pass
-            return go.Figure()
+        def rr_plot():
+            rr = risk_return_df()
+            hi = input.ticker()
 
+            # Empty data: still show % axes
+            if rr is None or rr.empty:
+                fig = go.Figure()
+                fig.update_layout(
+                    template="plotly_dark",
+                    height=520,
+                    margin=dict(l=10, r=10, t=10, b=10),
+                    xaxis_title="Annualized Volatility",
+                    yaxis_title="Annualized Return",
+                    xaxis=dict(range=[-0.1, 0.1], tickformat=".0%"),
+                    yaxis=dict(range=[-0.1, 0.1], tickformat=".0%"),
+                    annotations=[
+                        dict(
+                            text="No data in selected range",
+                            x=0.5,
+                            y=0.5,
+                            xref="paper",
+                            yref="paper",
+                            showarrow=False,
+                            font=dict(size=16),
+                        )
+                    ],
+                )
+                return fig
+
+            # Axis ranges so ALL points are always visible
+            x_rng = _padded_range(rr["AnnVol"], pad_frac=0.15)
+            y_rng = _padded_range(rr["AnnReturn"], pad_frac=0.15)
+
+            fig = go.Figure()
+
+            others = rr[rr["Ticker"] != hi]
+            fig.add_trace(
+                go.Scatter(
+                    x=others["AnnVol"],
+                    y=others["AnnReturn"],
+                    mode="markers+text",
+                    text=others["Ticker"],
+                    textposition="top center",
+                    marker=dict(size=12, opacity=0.65),
+                    hovertemplate="Ticker=%{text}<br>Vol=%{x:.2%}<br>Return=%{y:.2%}<extra></extra>",
+                    showlegend=False,
+                )
+            )
+
+            selected = rr[rr["Ticker"] == hi]
+            if not selected.empty:
+                fig.add_trace(
+                    go.Scatter(
+                        x=selected["AnnVol"],
+                        y=selected["AnnReturn"],
+                        mode="markers+text",
+                        text=selected["Ticker"],
+                        textposition="top center",
+                        marker=dict(size=18, opacity=1.0, line=dict(width=2, color="white")),
+                        hovertemplate="Ticker=%{text}<br>Vol=%{x:.2%}<br>Return=%{y:.2%}<extra></extra>",
+                        showlegend=False,
+                    )
+                )
+
+            fig.update_layout(
+                template="plotly_dark",
+                height=520,
+                margin=dict(l=10, r=10, t=10, b=10),
+                xaxis_title="Annualized Volatility",
+                yaxis_title="Annualized Return",
+                xaxis=dict(range=list(x_rng), tickformat=".0%", constrain="domain"),
+                yaxis=dict(range=list(y_rng), tickformat=".0%", constrain="domain"),
+            )
+            return fig
 
 with ui.layout_columns(col_widths={"sm": (5, 5, 2)}, row_heights="auto"):
 
@@ -348,7 +489,6 @@ with ui.layout_columns(col_widths={"sm": (10, 2)}, row_heights="auto"):
     with ui.card(style="width: 100%; height: 360px;"):
         ui.card_header("5. Stock Metrics Table")
 
-        # ✅ Express: layout_columns must be used with "with"
         with ui.layout_columns(col_widths=[7, 5]):
             ui.input_select(
                 "metrics_sort_by",
