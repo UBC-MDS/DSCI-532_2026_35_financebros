@@ -59,7 +59,7 @@ app_ui = ui.page_fluid(
         min=DATE_MIN,
         max=DATE_MAX,
     ),
-    output_widget("rr_plot"),
+    output_widget("rr_plot_test"),
 )
 
 
@@ -123,7 +123,7 @@ def server(input, output, session):
         return out.reset_index(drop=True)
 
     @render_plotly
-    def rr_plot():
+    def rr_plot_test():
         rr = risk_return_df()
         hi = input.ticker()
 
