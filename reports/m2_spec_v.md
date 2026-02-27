@@ -13,18 +13,19 @@ This document is a specification for our Shiny dashboard. It will be updated in 
 
 ## 2.2 Component Inventory
 
-This inventory is our implementation checklist for Phase 3+ (inputs → reactive calcs → outputs).
+This inventory reflects the final Express-based architecture (inputs → reactive calculations → outputs).
 
 | ID | Type | Shiny widget / renderer | Depends on | Job story |
 |---|---|---|---|---|
-| `input_ticker` | Input | `ui.input_select()` | — | #1, #2 |
-| `input_dates` | Input | `ui.input_date_range()` | — | #2 |
-| `input_rr_period` | Input | `ui.input_select()` (Full, 1Y, 5Y, 10Y) | — | #2 |
-| `analysis_close` | Reactive calc | `@reactive.calc` | `input_dates`, `input_rr_period` | #2 |
+| `ticker` | Input | `ui.input_selectize()` | — | #1, #2 |
+| `dates` | Input | `ui.input_date_range()` | — | #2 |
+| `rr_period` | Input | `ui.input_select()` (Full, 1Y, 5Y, 10Y) | — | #2 |
+| `analysis_close` | Reactive calc | `@reactive.calc` | `dates`, `rr_period` | #2 |
 | `risk_return_df` | Reactive calc | `@reactive.calc` | `analysis_close` | #2 |
-| `metrics_table_df` | Reactive calc | `@reactive.calc` | — | #1 |
-| `tbl_stock_metrics` | Output | `@render.data_frame` / `render.DataGrid` | `metrics_table_df`, `input_ticker` | #1 |
-| `plot_risk_return` | Output | `@render_plotly` → `go.Figure()` | `risk_return_df`, `input_ticker` | #2 |
+| `metrics_sort_by` | Input | `ui.input_select()` | — | #1 |
+| `metrics_sort_dir` | Input | `ui.input_radio_buttons()` | — | #1 |
+| `render_stock_metrics_table` | Output | `@render.data_frame` → `render.DataGrid` | `metric_df`, `metrics_sort_*` | #1 |
+| `rr_plot` | Output | `output_widget()` + `@render_plotly` | `risk_return_df`, `ticker` | #2 |
 
 ---
 
@@ -51,12 +52,12 @@ flowchart TD
 **Inputs:** `input_dates`, `input_rr_period`  
 
 **Transformation:**  
-This reactive calculation first filters the historical closing price dataset to the selected date range (`input_dates`). It then applies the selected risk/return analysis window (`input_rr_period`), which can be Full, 1Y, 5Y, or 10Y.  
+This reactive calculation filters the historical closing price dataset (`close.csv`) to the selected date range (`input_dates`). It then applies the selected risk/return window (`input_rr_period`): Full, 1Y, 5Y, or 10Y.  
 
-If **Full** is selected, the entire filtered date range is used.  
-If 1Y, 5Y, or 10Y is selected, the calculation uses the most recent 1, 5, or 10 years within the selected date range (if sufficient data is available).  
+If **Full** is selected, the entire filtered range is used.  
+If 1Y, 5Y, or 10Y is selected, only the most recent N years within the selected range are kept.  
 
-The resulting dataset represents the final price window used for return and volatility calculations.
+The resulting dataset is the final price window used for risk and return calculations.
 
 **Used by:** `risk_return_df`
 
@@ -67,26 +68,48 @@ The resulting dataset represents the final price window used for return and vola
 **Input:** `analysis_close`  
 
 **Transformation:**  
-Using the dataset returned by `analysis_close`, this reactive calculation computes daily percentage returns for each ticker. It then calculates:
+Using the filtered price data, this reactive calculation computes daily percentage returns for each ticker. It then calculates:
 
 - Annualized return  
 - Annualized volatility  
 
-The output is a summary dataframe containing one row per stock with its corresponding risk and return values, based on the selected analysis window.
+The output is a summary dataframe with one row per stock containing its annualized return and volatility based on the selected window.
 
-**Used by:** `plot_risk_return`
+**Used by:** `rr_plot`
 
 ---
 
-### `metrics_table_df`
+### `rr_plot`
 
-**Inputs:** `input_ticker` (for row highlighting), table sorting controls
+**Inputs:** `risk_return_df`, `input_ticker`  
 
 **Transformation:**  
-Prepares the snapshot valuation dataset from `metric.csv`, including Ticker, Date, Market Cap, P/E Ratio, Dividend Yield, and Revenue Growth.  
+Renders the risk–return scatter plot using annualized volatility (x-axis) and annualized return (y-axis).  
 
-The full 7-row dataset is displayed at all times. The row matching `input_ticker` is visually highlighted. If column sorting is enabled, the table can be reordered based on the selected metric while maintaining the highlighted row.
+Both axes are formatted as percentages. The selected stock (`input_ticker`) is visually emphasized.
 
-Fundamental metrics remain constant because only the latest snapshot values are available.
+---
 
-**Used by:** `tbl_stock_metrics`
+### `render_stock_price_chart`
+
+**Inputs:** `input_ticker`, `input_dates`  
+
+**Transformation:**  
+Displays the selected stock’s closing price over the chosen date range.  
+
+The chart updates whenever the ticker or date range changes.
+
+---
+
+### `render_stock_metrics_table`
+
+**Inputs:** `metrics_sort_by`, `metrics_sort_dir`  
+
+**Transformation:**  
+Prepares and sorts the snapshot valuation dataset from `metric.csv`.  
+
+The full dataset is always displayed. Rows can be reordered based on the selected metric and order. Fundamental values remain constant since only the latest snapshot is available.
+
+The row will be highlighted if the user select. 
+
+**Used by:** `render_stock_metrics_table`
