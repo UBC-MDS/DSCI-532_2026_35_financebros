@@ -48,6 +48,7 @@ flowchart TD
   T --> TR([render_portfolio_treemap])
   T --> PC([render_performance_comparison])
   T --> SP([render_sp500_comparison])
+  T --> SC([render_stock_price_chart])
 
   D[/input_dates/] --> A{{analysis_close}}
   D --> F{{get_filtered_close}}
@@ -58,11 +59,14 @@ flowchart TD
 
   F --> PC
   F --> SP
+  F --> SC
 
   MS[/input_metrics_sort_by/] --> G
   MD[/input_metrics_sort_dir/] --> G
 
   WT[/input_watchlist_toggle/] --> W([render_watchlist])
+
+  CD[(close_df)] --> CP([render_current_price])
 ```
 
 ---
