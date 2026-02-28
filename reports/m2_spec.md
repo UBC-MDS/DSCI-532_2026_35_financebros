@@ -80,7 +80,7 @@ flowchart TD
 **Transformation:**
 Filters the full historical closing price dataset (`close.csv`) to only the rows within the selected date range. No further windowing is applied — this is the base filtered dataset used by the performance charts.
 
-**Used by:** `render_performance_comparison`, `render_sp500_comparison`
+**Used by:** `render_performance_comparison`, `render_sp500_comparison`, `render_stock_price_chart`
 
 ---
 
@@ -108,6 +108,14 @@ Computes daily percentage returns for each ticker from the filtered price data, 
 
 ### Outputs (no separate reactive calc)
 
+**`render_current_price`** — Reads `close_df` directly (not date-filtered). Displays the most recent closing price and day-over-day percentage change for all Magnificent 7 stocks as a Finviz-style ticker strip. Color-coded green/red/grey based on direction of change.
+
+**`render_stock_price_chart`** — Consumes `get_filtered_close` and `input_ticker`. Plots the selected stock's closing price over the selected date range as a line chart with a range slider. Title includes the overall percentage change for the period.
+
+**`render_performance_comparison`** — Consumes `get_filtered_close` and `input_ticker`. Normalizes all stock prices to 100 at the start of the date range and plots multi-line performance, highlighting the selected ticker.
+
+**`render_sp500_comparison`** — Consumes `get_filtered_close`, `input_ticker`, and `input_dates`. Normalizes the selected stock and SPY to 100 and plots both lines for direct comparison.
+
 **`render_stock_metrics_table`** — Reads `metric_df` directly. Sorts by the selected metric (`metrics_sort_by`) in the selected order (`metrics_sort_dir`) before formatting and displaying values.
 
 **`rr_plot`** — Consumes `risk_return_df` and `input_ticker`. Renders a scatter plot of annualized volatility vs annualized return, with the selected ticker visually highlighted.
@@ -115,7 +123,3 @@ Computes daily percentage returns for each ticker from the filtered price data, 
 **`render_portfolio_treemap`** — Reads `metric_df` directly. Sizes tiles by market cap, highlights the selected ticker in blue.
 
 **`render_watchlist`** — Reads `wishlist_df` directly. Computes the most recent day-over-day price change per watchlist stock and displays it in dollar or percentage format based on `watchlist_toggle`, color-coded green/red.
-
-**`render_performance_comparison`** — Consumes `get_filtered_close` and `input_ticker`. Normalizes all stock prices to 100 at the start of the date range and plots multi-line performance, highlighting the selected ticker.
-
-**`render_sp500_comparison`** — Consumes `get_filtered_close`, `input_ticker`, and `input_dates`. Normalizes the selected stock and SPY to 100 and plots both lines for direct comparison.
