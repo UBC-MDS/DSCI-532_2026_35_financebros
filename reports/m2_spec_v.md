@@ -31,7 +31,7 @@ This inventory reflects the final Express-based architecture (inputs → reactiv
 
 ## 2.3 Reactivity Diagram
 
-```mermaidS
+```mermaid
 flowchart TD
   D[/input_dates/] --> A{{analysis_close}}
   P[/input_rr_period/] --> A{{analysis_close}}
