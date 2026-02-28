@@ -5,7 +5,7 @@ Review your M1 job stories in light of your deployment setup and any new insight
 | #   | Job Story                       | Status         | Notes                         |
 | --- | ------------------------------- | -------------- | ----------------------------- |
 | 1   | Reporting: As an investor I want to be able to see a quick preview of the current state of each of the magnificent 7, including current price and performance, so that I can identify which companies are performing better. | ✅ Implemented | Accounted for by component 1                               |
-| 2   | Performance tracking: As an investor I want to be able to track the performance of each stock from the Magnificent 7, that i select,over time, so that I can make informed decisions about buying or selling. | ✅ Implemented     | Accounted for by component 2 |
+| 2   | Performance tracking: As an investor I want to be able to track the performance of each stock from the Magnificent 7, that I select, over time, so that I can make informed decisions about buying or selling. | ✅ Implemented     | Accounted for by component 2 |
 
 ### 2.2 Component Inventory
 
