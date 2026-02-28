@@ -1,9 +1,23 @@
 # DSCI-532_2026_35_financebros
 Dashboard for stonks
 
+## Live Demo
+
+- **Stable:** https://019c96fb-7645-b17f-61b0-46a58d974625.share.connect.posit.cloud/
+- **Preview:** https://019c96fc-ef4e-2932-2355-311a3030aeb5.share.connect.posit.cloud/
+
 ## About
 
 The financebros dashboard is a web application that tracks key financial metrics regarding a portfolio comprised of the Magnificent Seven stocks: Apple, Microsoft, Amazon, Alphabet (Google’s parent company), Meta, Nvidia, and Tesla. The dashboard provides users with insights into the performance of these stocks, including price trends, volatility, and other relevant financial indicators. It also compares the performance of the portfolio against the S&P 500 index.
+## Demo
+
+<details open>
+<summary>Click to close app demo</summary>
+
+![Dashboard Demo](img/demo_m7_resized.gif)
+
+</details>
+
 ## For Developers
 
 To set up and run the dashboard locally:

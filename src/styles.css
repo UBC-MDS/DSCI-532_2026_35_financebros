@@ -1,7 +1,213 @@
+/* Finviz-inspired Stock Visualization Theme */
+
 :root {
-  --bslib-sidebar-main-bg: #f8f8f8;
+  /* Finviz-style color palette */
+  --finviz-bg-dark: #131722;
+  --finviz-bg-card: #1e222d;
+  --finviz-bg-sidebar: #1e222d;
+  --finviz-text: #d1d4dc;
+  --finviz-text-muted: #787b86;
+  --finviz-green: #44bb70;
+  --finviz-red: #d62728;
+  --finviz-border: #2a2e39;
+  --finviz-accent: #2962ff;
 }
 
-.plotly .modebar-container {
-  display: none !important;
+/* Dark theme base */
+body {
+  background-color: var(--finviz-bg-dark) !important;
+  color: var(--finviz-text) !important;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    "Helvetica Neue", Arial, "Noto Sans", sans-serif !important;
+}
+
+/* Main container text color */
+.main {
+  color: var(--finviz-text) !important;
+}
+
+.bslib-card-body p {
+  color: var(--finviz-text) !important;
+}
+
+/* Sidebar styling */
+.bslib-sidebar-layout .bslib-sidebar-main,
+.bslib-sidebar-layout .bslib-sidebar {
+  background-color: var(--finviz-bg-sidebar) !important;
+}
+
+.bslib-sidebar-layout .bslib-sidebar {
+  border-right: 1px solid var(--finviz-border) !important;
+}
+
+/* Card styling - finviz data-dense look */
+.bslib-card {
+  color: var(--finviz-text) !important;
+  background-color: var(--finviz-bg-card) !important;
+  border: 1px solid var(--finviz-border) !important;
+  border-radius: 4px !important;
+}
+
+.bslib-card-header {
+  background-color: rgba(57, 42, 45, 0.5) !important;
+  border-bottom: 1px solid var(--finviz-border) !important;
+  color: var(--finviz-text) !important;
+  font-weight: 600 !important;
+}
+
+div.card-body {
+  overflow: hidden !important;
+}
+
+/* Value boxes and key metrics - bold emphasis */
+.bslib-value-box {
+  background-color: var(--finviz-bg-card) !important;
+  border: 1px solid var(--finviz-border) !important;
+}
+
+.bslib-value-box .value-box-value {
+  font-weight: 700 !important;
+  color: var(--finviz-text) !important;
+}
+
+/* Positive/negative color coding */
+.text-success,
+.positive,
+.up {
+  color: var(--finviz-green) !important;
+}
+
+.text-danger,
+.negative,
+.down {
+  color: var(--finviz-red) !important;
+}
+
+/* Table styling - finviz ticker table aesthetic */
+.dataTables_wrapper,
+table.dataTable {
+  background-color: var(--finviz-bg-card) !important;
+  color: var(--finviz-text) !important;
+}
+
+table.dataTable thead th {
+  background-color: rgba(42, 46, 57, 0.8) !important;
+  color: var(--finviz-text) !important;
+  border-bottom: 1px solid var(--finviz-border) !important;
+}
+
+table.dataTable tbody td {
+  background-color: var(--finviz-bg-card) !important;
+  border-bottom: 1px solid var(--finviz-border) !important;
+  color: var(--finviz-text) !important;
+}
+
+table.dataTable tbody tr {
+  background-color: var(--finviz-bg-card) !important;
+}
+
+table.dataTable tbody tr:hover {
+  background-color: rgba(41, 98, 255, 0.1) !important;
+}
+
+/* Shiny data grid table styling */
+.shiny-data-grid table thead th {
+  background-color: transparent !important;
+  color: var(--finviz-text) !important;
+}
+
+/* Form controls */
+.form-control,
+.form-select,
+input[type="text"],
+select {
+  background-color: var(--finviz-bg-dark) !important;
+  color: var(--finviz-text) !important;
+  border: 1px solid var(--finviz-border) !important;
+}
+
+.form-control:focus,
+.form-select:focus {
+  border-color: var(--finviz-accent) !important;
+  box-shadow: 0 0 0 0.2rem rgba(41, 98, 255, 0.25) !important;
+}
+
+#dates input {
+  font-size: 0.75rem !important;
+}
+
+/* Labels */
+label {
+  color: var(--finviz-text) !important;
+}
+
+/* plotly styling */
+.js-plotly-plot .plotly .main-svg {
+  color: var(--finviz-text) !important;
+  background-color: transparent !important;
+}
+
+/* Switch/toggle styling */
+.form-check-input {
+  background-color: var(--finviz-bg-dark) !important;
+  border-color: var(--finviz-border) !important;
+}
+
+.form-check-input:checked {
+  background-color: var(--finviz-green) !important;
+  border-color: var(--finviz-green) !important;
+}
+
+/* Numeric display - professional font for financial data */
+.fs-3,
+.fw-bold {
+  font-variant-numeric: tabular-nums !important;
+}
+
+/*Boxes styling */
+.tickerstrip {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 0.5rem;
+  width: 100%;
+}
+
+.tickerbox {
+  background: #1e222d;
+  border: 1px solid #2a2e39;
+  border-radius: 12px;
+  padding: 0.55rem 0.6rem;
+  min-width: 0;
+}
+
+.tickerbox-ticker {
+  font-weight: 700;
+  font-size: 0.9rem;
+  color: #d1d4dc;
+  letter-spacing: 0.02em;
+}
+
+.tickerbox-price {
+  margin-top: 0.1rem;
+  font-weight: 700;
+  font-size: 1.0rem;
+  color: #ffffff;
+}
+
+.tickerbox-ret {
+  margin-top: 0.15rem;
+  font-weight: 600;
+  font-size: 0.85rem;
+}
+
+.ret-pos { color: #44bb70; }
+.ret-neg { color: #d62728; }
+.ret-flat { color: #9aa0a6; }
+
+@media (max-width: 900px) {
+  .tickerstrip {
+    grid-template-columns: repeat(7, minmax(140px, 1fr));
+    overflow-x: auto;
+    padding-bottom: 0.25rem;
+  }
 }
