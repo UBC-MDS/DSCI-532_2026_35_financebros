@@ -775,16 +775,40 @@ with ui.layout_columns(col_widths={"sm": (10, 2)}, row_heights="auto"):
     with ui.card(full_screen=True):
         ui.card_header("5. Stock Metrics Table")
 
-        def format_metrics_df(df, sort_by_column):
-            df = df.copy()
+        with ui.layout_columns(col_widths=[7, 5]):
+            ui.input_select(
+                "metrics_sort_by",
+                "Sort by",
+                choices={
+                    "Market Cap": "MarketCap",
+                    "P/E Ratio": "P/E Ratio",
+                    "Dividend Yield": "DividendYield",
+                    "Revenue Growth": "Revenue Growth",
+                },
+                selected="MarketCap",
+            )
+            ui.input_radio_buttons(
+                "metrics_sort_dir",
+                "Order",
+                choices={"desc": "Descending", "asc": "Ascending"},
+                selected="desc",
+                inline=True,
+            )
+
+        @render.data_frame
+        def render_stock_metrics_table():
+            df = metric_df.copy()
 
             if "Unnamed: 0" in df.columns:
                 df = df.drop(columns=["Unnamed: 0"])
 
-            # Sort BEFORE formatting, on numeric values directly
-            if sort_by_column in df.columns:
-                df[sort_by_column] = pd.to_numeric(df[sort_by_column], errors="coerce")
-                df = df.sort_values(sort_by_column, ascending=False, na_position="last")
+            sort_key = input.metrics_sort_by()
+            ascending = (input.metrics_sort_dir() == "asc")
+
+            # Sort BEFORE formatting on numeric values
+            if sort_key in df.columns:
+                df[sort_key] = pd.to_numeric(df[sort_key], errors="coerce")
+                df = df.sort_values(sort_key, ascending=ascending, na_position="last")
 
             df = df.reset_index(drop=True)
 
@@ -799,71 +823,19 @@ with ui.layout_columns(col_widths={"sm": (10, 2)}, row_heights="auto"):
 
             if "DividendYield" in df.columns:
                 dy = pd.to_numeric(df["DividendYield"], errors="coerce") * 100
-                df["DividendYield"] = dy.map(
-                    lambda x: "" if pd.isna(x) else f"{x:.2f}%"
-                )
+                df["DividendYield"] = dy.map(lambda x: "" if pd.isna(x) else f"{x:.2f}%")
 
             if "Revenue Growth" in df.columns:
                 rg = pd.to_numeric(df["Revenue Growth"], errors="coerce") * 100
-                df["Revenue Growth"] = rg.map(
-                    lambda x: "" if pd.isna(x) else f"{x:.2f}%"
-                )
+                df["Revenue Growth"] = rg.map(lambda x: "" if pd.isna(x) else f"{x:.2f}%")
 
-            return df
-
-        with ui.navset_tab():
-            with ui.nav_panel("Market Cap"):
-
-                @render.data_frame
-                def render_metrics_market_cap():
-                    df = format_metrics_df(metric_df, "MarketCap")
-                    return render.DataGrid(
-                        df,
-                        width="100%",
-                        height="100%",
-                        filters=False,
-                        selection_mode="rows",
-                    )
-
-            with ui.nav_panel("P/E Ratio"):
-
-                @render.data_frame
-                def render_metrics_pe():
-                    df = format_metrics_df(metric_df, "P/E Ratio")
-                    return render.DataGrid(
-                        df,
-                        width="100%",
-                        height="100%",
-                        filters=False,
-                        selection_mode="rows",
-                    )
-
-            with ui.nav_panel("Dividend Yield"):
-
-                @render.data_frame
-                def render_metrics_dividend():
-                    df = format_metrics_df(metric_df, "DividendYield")
-                    return render.DataGrid(
-                        df,
-                        width="100%",
-                        height="100%",
-                        filters=False,
-                        selection_mode="rows",
-                    )
-
-            with ui.nav_panel("Revenue Growth"):
-
-                @render.data_frame
-                def render_metrics_revenue():
-                    df = format_metrics_df(metric_df, "Revenue Growth")
-                    return render.DataGrid(
-                        df,
-                        width="100%",
-                        height="100%",
-                        filters=False,
-                        selection_mode="rows",
-                    )
-
+            return render.DataGrid(
+                df,
+                width="100%",
+                height="100%",
+                filters=False,
+                selection_mode="rows",
+            )
     # 8. Watchlist Display
     with ui.card():
         ui.card_header("8. Watchlist")
