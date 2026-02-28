@@ -11,7 +11,8 @@
 | 3 | Portfolio Visualization: As an investor, when I select a stock from the Magnificent 7, I want to see its relative market capitalization compared to other companies in a treemap, so that I can understand the size and weight of each company in the portfolio at a glance. | ✅ Implemented | Implemented as component 7 (Portfolio Treemap), highlights selected stock in blue. |
 | 4 | Watchlist Tracking: As an investor, when I monitor my watchlist stocks, I want to see their latest price changes in both dollar and percentage formats (togglable), so that I can quickly assess performance and decide whether to buy or sell. | ✅ Implemented | Implemented as component 8 (Watchlist), uses color-coded changes (green/red). |
 | 5 | Performance Comparison: As an investor I want to compare historical stock performance across the Magnificent 7, so that I can identify which companies are leading or lagging over a selected time period, and also compare these stocks to the S&P 500 so I can understand how top tech stocks compare. | ✅ Implemented | No changes needed, accounted for by components 3 and 4. |
-
+| 6   | Reporting: As an investor I want to be able to see a quick preview of the current state of each of the magnificent 7, including current price and performance, so that I can identify which companies are performing better. | ✅ Implemented | Accounted for by component 1 |
+| 7   | Performance tracking: As an investor I want to be able to track the performance of each stock from the Magnificent 7, that i select,over time, so that I can make informed decisions about buying or selling. | ✅ Implemented | Accounted for by component 2|
 ---
 
 ## 2.2 Component Inventory
@@ -33,6 +34,8 @@
 | `render_watchlist` | Output | `@render.data_frame` | `watchlist_toggle` | #4 |
 | `render_performance_comparison` | Output | `@render_plotly` | `get_filtered_close`, `ticker` | #5 |
 | `render_sp500_comparison` | Output | `@render_plotly` | `get_filtered_close`, `ticker`, `dates` | #5 |
+| `render_current_price` | Output   | `@render.ui`| `close_df`| #1 |
+| `render_stock_price_chart`| Output | `@render_plotly`| `get_filtered_close`, `ticker`| #2 |
 
 ---
 
