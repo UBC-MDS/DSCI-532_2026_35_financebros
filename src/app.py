@@ -211,6 +211,12 @@ with ui.layout_columns(col_widths={"sm": (4, 4, 4)}, row_heights="auto"):
 
         @render_plotly
         def rr_plot():
+            """
+            6. Risk-Return Scatter Plot.
+            Scatter plot of risk (volatility) vs return for all portfolio stocks.
+            Selected stock highlighted. Reacts to: dropdown only (uses selected date range).
+            Data: Calculate from close.csv; highlight selected stock.
+            """
             rr = risk_return_df()
             hi = input.ticker()
 
