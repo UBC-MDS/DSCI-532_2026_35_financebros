@@ -1243,8 +1243,7 @@ with ui.navset_tab(id="main_tabs"):
         @reactive.effect
         @reactive.event(input.qc_reset)
         def _qc_reset_effect():
-            qc.sql(None)
-            qc.title(None)
+            qc.reset()
 
 
 # -----------------------------------------------------------------------------
