@@ -1015,7 +1015,7 @@ with ui.navset_tab(id="main_tabs"):
         qc = QueryChat(
             qc_data,
             "stocks",
-            client=clt.chatanthropic(model="claude-sonnet-4-0"),
+            client=clt.ChatAnthropic(model="claude-sonnet-4-0"),
             greeting=(
                 "Hello! I am your Finance Bros assistant. And I am at your service. Let me know how I can help you explore the stock data."
             )
