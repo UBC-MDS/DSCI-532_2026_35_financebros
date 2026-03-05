@@ -1024,7 +1024,10 @@ with ui.navset_tab(id="main_tabs"):
         
         with ui.layout_sidebar():
             with ui.sidebar():
-                qc.ui()
+                ui.tags.div(
+                    {"style": "height: 400px; overflow-y: auto; display: flex; flex-direction: column;"},
+                    qc.ui()
+                )
                 ui.hr()
                 ui.input_action_button("qc_reset", "Reset", class_="w-100")
                 ui.hr()
@@ -1243,7 +1246,7 @@ with ui.navset_tab(id="main_tabs"):
         @reactive.effect
         @reactive.event(input.qc_reset)
         def _qc_reset_effect():
-            qc.reset()
+            qc.sql("SELECT * FROM stocks")
 
 
 # -----------------------------------------------------------------------------
