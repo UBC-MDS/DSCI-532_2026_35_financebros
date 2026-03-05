@@ -109,6 +109,24 @@ ui.tags.style("""
     flex: 0 0 140px;
   }
 }
+
+/* Fix DataGrid hover in dark mode */
+.shiny-data-grid table tbody tr:hover {
+    background-color: #2a3a4a !important;
+    color: #ffffff !important;
+}
+
+.shiny-data-grid table tbody tr:hover td {
+    background-color: #2a3a4a !important;
+    color: #ffffff !important;
+}
+
+/* Override any inline or inherited styles */
+[data-row]:hover {
+    background-color: #2a3a4a !important;
+    color: #ffffff !important;
+}                                         
+
 """)
 
 # -----------------------------------------------------------------------------
