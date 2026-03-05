@@ -465,61 +465,20 @@ with ui.layout_columns(col_widths={"sm": (4, 4, 4)}, row_heights="auto"):
             rr["AnnReturn"] = rr["AnnReturn"].clip(Y_MIN, Y_MAX)
             rr = rr.reset_index(drop=True)
 
-            # ── Smart label placement via annotations ─────────────────────────────
-            x_range = X_MAX - X_MIN
-            y_range = Y_MAX - Y_MIN
-
-            offsets = {
-                "top": (0.00, 0.035),
-                "bottom": (0.00, -0.035),
-                "right": (0.05, 0.00),
-                "left": (-0.05, 0.00),
-                "top-right": (0.04, 0.030),
-                "top-left": (-0.04, 0.030),
-                "bottom-right": (0.04, -0.030),
-                "bottom-left": (-0.04, -0.030),
-            }
-
-            def pick_offset(idx):
-                xi = (rr.at[idx, "AnnVol"] - X_MIN) / x_range
-                yi = (rr.at[idx, "AnnReturn"] - Y_MIN) / y_range
-                neighbours = [j for j in rr.index if j != idx]
-                best, best_dist = (0.00, 0.035), -1
-                for dx, dy in offsets.values():
-                    lx, ly = xi + dx, yi + dy
-                    min_d = (
-                        min(
-                            (
-                                (lx - (rr.at[j, "AnnVol"] - X_MIN) / x_range) ** 2
-                                + (ly - (rr.at[j, "AnnReturn"] - Y_MIN) / y_range) ** 2
-                            )
-                            ** 0.5
-                            for j in neighbours
-                        )
-                        if neighbours
-                        else 1.0
-                    )
-                    if min_d > best_dist:
-                        best_dist = min_d
-                        best = (dx, dy)
-                return best
-
+            # ── Label only the selected stock ─────────────────────────────────────
             annotations = []
-            for i in rr.index:
-                dx, dy = pick_offset(i)
-                is_selected = rr.at[i, "Ticker"] == hi
+            sel_rows = rr[rr["Ticker"] == hi]
+            if not sel_rows.empty:
+                i = sel_rows.index[0]
                 annotations.append(
                     dict(
-                        x=rr.at[i, "AnnVol"] + dx * x_range,
-                        y=rr.at[i, "AnnReturn"] + dy * y_range,
+                        x=rr.at[i, "AnnVol"],
+                        y=rr.at[i, "AnnReturn"] + 0.035,
                         text=rr.at[i, "Ticker"],
                         showarrow=False,
-                        font=dict(
-                            size=13 if is_selected else 11,
-                            color="white" if is_selected else "#aaaaaa",
-                        ),
+                        font=dict(size=13, color="white"),
                         xanchor="center",
-                        yanchor="middle",
+                        yanchor="bottom",
                     )
                 )
 
@@ -533,8 +492,8 @@ with ui.layout_columns(col_widths={"sm": (4, 4, 4)}, row_heights="auto"):
                     x=others["AnnVol"],
                     y=others["AnnReturn"],
                     mode="markers",  # ← markers only, NO text mode
-                    marker=dict(size=12, opacity=0.65),
-                    hovertemplate="Ticker=%{customdata}<br>Volatility=%{x:.2%}<br>Return=%{y:.2%}<extra></extra>",
+                    marker=dict(size=12, opacity=0.65, color="#4a9eff"),
+                    hovertemplate="Ticker = %{customdata}<br>Volatility = %{x:.2%}<br>Return = %{y:.2%}<extra></extra>",
                     customdata=others["Ticker"],
                     showlegend=False,
                 )
@@ -547,9 +506,9 @@ with ui.layout_columns(col_widths={"sm": (4, 4, 4)}, row_heights="auto"):
                         y=selected["AnnReturn"],
                         mode="markers",  # ← markers only, NO text mode
                         marker=dict(
-                            size=18, opacity=1.0, line=dict(width=2, color="white")
+                            size=18, opacity=1.0, line=dict(width=2, color="white"), color="#ff6b35"
                         ),
-                        hovertemplate="Ticker=%{customdata}<br>Volatility=%{x:.2%}<br>Return=%{y:.2%}<extra></extra>",
+                        hovertemplate="Ticker = %{customdata}<br>Volatility = %{x:.2%}<br>Return = %{y:.2%}<extra></extra>",
                         customdata=selected["Ticker"],
                         showlegend=False,
                     )
