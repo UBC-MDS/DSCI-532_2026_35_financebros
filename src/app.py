@@ -125,8 +125,13 @@ ui.tags.style("""
 [data-row]:hover {
     background-color: #2a3a4a !important;
     color: #ffffff !important;
-}                                         
+}
 
+/* Card header title */
+.card-header {
+    font-size: 23px !important;
+}
+              
 """)
 
 # -----------------------------------------------------------------------------
@@ -411,7 +416,7 @@ with ui.layout_columns(col_widths={"sm": (4, 4, 4)}, row_heights="auto"):
     with ui.card(full_screen=True):
         with ui.card_header():
             ui.div(
-                ui.div("Risk-Return Profile", style="font-weight:700; font-size:16px;"),
+                ui.div("Risk-Return Profile", style="font-weight:700;"),
                 ui.input_selectize(
                     "rr_period",
                     None,
@@ -544,6 +549,14 @@ with ui.layout_columns(col_widths={"sm": (4, 4, 4)}, row_heights="auto"):
                 xaxis_title="Annualized Volatility",
                 margin=dict(l=10, r=10, t=10, b=10),
                 annotations=annotations,
+                xaxis=dict(
+                    title_font=dict(size=16),   # ← x-axis title size
+                    tickfont=dict(size=14),     # ← x-axis tick numbers size
+            ),
+                yaxis=dict(
+                    title_font=dict(size=16),   # ← y-axis title size
+                    tickfont=dict(size=14),     # ← y-axis tick numbers size
+                ),
             )
             return fig
 
