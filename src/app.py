@@ -151,13 +151,6 @@ with ui.sidebar():
         selected="AAPL",
     )
 
-    ui.input_selectize(
-        "rr_period",
-        "Risk/Return Window",
-        choices=["Full", "1Y", "5Y", "10Y"],
-        selected="Full",
-    )
-
 # -----------------------------------------------------------------------------
 # Reactive Data Calculations
 # -----------------------------------------------------------------------------
@@ -235,14 +228,19 @@ def analysis_close():
 
 @reactive.calc
 def risk_return_df():
-    """
-    From analysis_close(), compute annualized return + annualized volatility per ticker.
-    """
     df = analysis_close()
+    period = input.rr_period()  # ← must be at the TOP so reactive knows to watch it
+
     if df.empty:
         return pd.DataFrame(columns=["Ticker", "AnnReturn", "AnnVol"])
 
     prices = df.set_index("Date")[RR_TICKERS].astype(float)
+
+    if period != "Full":
+        years = int(period.replace("Y", ""))
+        cutoff = pd.Timestamp.today() - pd.DateOffset(years=years)
+        prices = prices[prices.index >= cutoff]
+
     rets = prices.pct_change().dropna(how="all")
 
     if rets.empty:
@@ -251,16 +249,13 @@ def risk_return_df():
     mean_daily = rets.mean()
     std_daily = rets.std()
 
-    out = pd.DataFrame(
-        {
-            "Ticker": mean_daily.index,
-            "AnnReturn": mean_daily.values * 252,
-            "AnnVol": std_daily.values * np.sqrt(252),
-        }
-    ).dropna()
+    out = pd.DataFrame({
+        "Ticker": mean_daily.index,
+        "AnnReturn": mean_daily.values * 252,
+        "AnnVol": std_daily.values * np.sqrt(252),
+    }).dropna()
 
     return out.reset_index(drop=True)
-
 
 # -----------------------------------------------------------------------------
 # Layout - 3-column grid matching sketch.png
@@ -414,8 +409,17 @@ with ui.layout_columns(col_widths={"sm": (4, 4, 4)}, row_heights="auto"):
 
     # 6. Risk-Return Scatter Plot
     with ui.card(full_screen=True):
-        ui.card_header("Risk-Return Profile")
-
+        with ui.card_header():
+            ui.div(
+                ui.div("Risk-Return Profile", style="font-weight:700; font-size:16px;"),
+                ui.input_selectize(
+                    "rr_period",
+                    None,
+                    choices=["Full", "1Y", "5Y", "10Y"],
+                    selected="Full",
+                ),
+                style="display:flex; justify-content:space-between; align-items:center; width:100%;",
+            )
         @render_plotly
         def rr_plot():
             """
