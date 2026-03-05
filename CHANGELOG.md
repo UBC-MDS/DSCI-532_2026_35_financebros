@@ -7,6 +7,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Latest Release
 
+### Added
+- Added `rr_period` time window selector (Full / 1Y / 5Y / 10Y) inside the Risk-Return Profile card header for in-chart filtering
+
+### Changed
+- Renamed all 8 dashboard components and dashboard title to more descriptive, professional names
+- Moved Risk-Return scatter plot to Row 3 and Watchlist & Alerts up to Row 1
+- Scatter plot now labels only the selected stock ticker instead of all tickers
+- Updated scatter plot point colors: unselected `#4a9eff` (blue), selected `#ff6b35` (orange) with white border
+- Increased font sizes globally: card headers, axis titles, tick labels, table values, sort controls, and sidebar labels
+- Updated Sort by dropdown to white background for dark mode visibility
+- Adjusted row heights across all three layout rows for better spacing
+
+### Fixed
+- Fixed dark mode hover color on DataGrid rows being unreadable (white background, light blue text)
+
 ### Added / Fixed
 
 ## [0.2.0]
