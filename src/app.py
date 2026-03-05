@@ -131,7 +131,46 @@ ui.tags.style("""
 .card-header {
     font-size: 23px !important;
 }
-              
+
+/* Labels */
+label[for="metrics_sort_by"],
+label[for="metrics_sort_dir"] {
+    font-size: 17px !important;
+}
+
+/* Sort by - regular select input */
+#metrics_sort_by {
+    font-size: 17px !important;
+    background-color: #ffffff !important;
+    color: #000000 !important;
+    border: 1px solid #cccccc !important;
+}
+
+.selectize-control .selectize-dropdown {
+    font-size: 17px !important;
+    background-color: #ffffff !important;
+    color: #000000 !important;
+}
+
+/* Descending/Ascending radio buttons */
+#metrics_sort_dir label {
+    font-size: 17px !important;
+}
+
+/* Table cell values and headers */
+.shiny-data-grid table td,
+.shiny-data-grid table th {
+    font-size: 17px !important;
+}
+
+/* Risk-Return period dropdown - keep default white, just bigger font */
+#rr_period + .selectize-control .selectize-input {
+    font-size: 17px !important;
+}
+
+#rr_period + .selectize-control .selectize-dropdown {
+    font-size: 17px !important;
+}     
 """)
 
 # -----------------------------------------------------------------------------
@@ -411,155 +450,77 @@ with ui.layout_columns(col_widths={"sm": (4, 4, 4)}, row_heights="auto"):
 
             return fig
             
+     # 8. Watchlist Display
+    with ui.card():
+        ui.card_header("Watchlist & Alerts")
+        ui.input_switch("watchlist_toggle", "Show as $ or %", value=False)
 
-    # 6. Risk-Return Scatter Plot
-    with ui.card(full_screen=True):
-        with ui.card_header():
-            ui.div(
-                ui.div("Risk-Return Profile", style="font-weight:700;"),
-                ui.input_selectize(
-                    "rr_period",
-                    None,
-                    choices=["Full", "1Y", "5Y", "10Y"],
-                    selected="Full",
-                ),
-                style="display:flex; justify-content:space-between; align-items:center; width:100%;",
-            )
-        @render_plotly
-        def rr_plot():
+        @render.data_frame
+        def render_watchlist():
             """
-            6. Risk-Return Scatter Plot.
-            Scatter plot of risk (volatility) vs return for all portfolio stocks.
-            Selected stock highlighted. Reacts to: dropdown only (uses selected date range).
-            Data: Calculate from close.csv; highlight selected stock.
+            8. Watchlist Display.
+            Table of watchlist stocks (from wishlist.csv) with Symbol, Company,
+            and Change (colored red/green). Global toggle for percentage vs dollar.
+            Reacts to: neither dropdown nor date range.
             """
-            rr = risk_return_df()
-            hi = input.ticker()
+            current_prices = wishlist_df.iloc[-1]
+            previous_prices = wishlist_df.iloc[-2]
 
-            X_MIN, X_MAX = 0.0, 1.0
-            Y_MIN, Y_MAX = -0.10, 1.0
+            watchlist_data = []
+            for ticker in wishlist_dict.keys():
+                current = current_prices[ticker]
+                previous = previous_prices[ticker]
+                dollar_change = current - previous
+                percent_change = (dollar_change / previous) * 100
 
-            LAYOUT_BASE = dict(
-                template="plotly_dark",
-                height=520,
-                autosize=True,
-                margin=dict(l=60, r=30, t=20, b=60),
-                xaxis_title="Annualized Volatility",
-                yaxis_title="Annualized Return",
-                xaxis=dict(
-                    range=[X_MIN, X_MAX],
-                    autorange=False,
-                    fixedrange=True,
-                    tickformat=".0%",
-                    tickmode="linear",
-                    tick0=0,
-                    dtick=0.2,
-                ),
-                yaxis=dict(
-                    range=[Y_MIN, Y_MAX],
-                    autorange=False,
-                    fixedrange=True,
-                    tickformat=".0%",
-                    tickmode="linear",
-                    tick0=-0.1,
-                    dtick=0.2,
-                ),
+                if input.watchlist_toggle():
+                    change_value = f"{percent_change:+.2f}%"
+                else:
+                    change_value = f"${dollar_change:+.2f}"
+
+                watchlist_data.append(
+                    {
+                        "Symbol": ticker,
+                        "Change": change_value,
+                    }
+                )
+
+            df = pd.DataFrame(watchlist_data)
+
+            return render.DataTable(
+                df,
+                styles=[
+                    {
+                        "rows": [
+                            i
+                            for i, row in enumerate(watchlist_data)
+                            if "-" not in row["Change"]
+                        ],
+                        "cols": [0, 1],
+                        "style": {
+                            "color": "#44bb70",
+                            "font-weight": "600",
+                            "background-color": "transparent",
+                        },
+                    },
+                    {
+                        "rows": [
+                            i
+                            for i, row in enumerate(watchlist_data)
+                            if "-" in row["Change"]
+                        ],
+                        "cols": [0, 1],
+                        "style": {
+                            "color": "#d62728",
+                            "font-weight": "600",
+                            "background-color": "transparent",
+                        },
+                    },
+                ],
+                filters=False,
+                selection_mode="none",
             )
-
-            if rr is None or rr.empty:
-                fig = go.Figure()
-                fig.update_layout(
-                    **LAYOUT_BASE,
-                    annotations=[
-                        dict(
-                            text="No data in selected range",
-                            x=0.5,
-                            y=0.5,
-                            xref="paper",
-                            yref="paper",
-                            showarrow=False,
-                            font=dict(size=16),
-                        )
-                    ],
-                )
-                return fig
-
-            rr = rr.copy()
-            rr["AnnVol"] = pd.to_numeric(rr["AnnVol"], errors="coerce")
-            rr["AnnReturn"] = pd.to_numeric(rr["AnnReturn"], errors="coerce")
-            rr = rr.dropna(subset=["Ticker", "AnnVol", "AnnReturn"])
-            rr["AnnVol"] = rr["AnnVol"].clip(X_MIN, X_MAX)
-            rr["AnnReturn"] = rr["AnnReturn"].clip(Y_MIN, Y_MAX)
-            rr = rr.reset_index(drop=True)
-
-            # ── Label only the selected stock ─────────────────────────────────────
-            annotations = []
-            sel_rows = rr[rr["Ticker"] == hi]
-            if not sel_rows.empty:
-                i = sel_rows.index[0]
-                annotations.append(
-                    dict(
-                        x=rr.at[i, "AnnVol"],
-                        y=rr.at[i, "AnnReturn"] + 0.035,
-                        text=rr.at[i, "Ticker"],
-                        showarrow=False,
-                        font=dict(size=13, color="white"),
-                        xanchor="center",
-                        yanchor="bottom",
-                    )
-                )
-
-            others = rr[rr["Ticker"] != hi]
-            selected = rr[rr["Ticker"] == hi]
-
-            fig = go.Figure()
-
-            fig.add_trace(
-                go.Scatter(
-                    x=others["AnnVol"],
-                    y=others["AnnReturn"],
-                    mode="markers",  # ← markers only, NO text mode
-                    marker=dict(size=12, opacity=0.65, color="#4a9eff"),
-                    hovertemplate="Ticker = %{customdata}<br>Volatility = %{x:.2%}<br>Return = %{y:.2%}<extra></extra>",
-                    customdata=others["Ticker"],
-                    showlegend=False,
-                )
-            )
-
-            if not selected.empty:
-                fig.add_trace(
-                    go.Scatter(
-                        x=selected["AnnVol"],
-                        y=selected["AnnReturn"],
-                        mode="markers",  # ← markers only, NO text mode
-                        marker=dict(
-                            size=18, opacity=1.0, line=dict(width=2, color="white"), color="#ff6b35"
-                        ),
-                        hovertemplate="Ticker = %{customdata}<br>Volatility = %{x:.2%}<br>Return = %{y:.2%}<extra></extra>",
-                        customdata=selected["Ticker"],
-                        showlegend=False,
-                    )
-                )
-
-            fig.update_xaxes(range=[X_MIN, X_MAX], autorange=False)
-            fig.update_yaxes(range=[Y_MIN, Y_MAX], autorange=False)
-            fig.update_layout(
-                template="plotly_dark",
-                yaxis_title="Annualized Return",
-                xaxis_title="Annualized Volatility",
-                margin=dict(l=10, r=10, t=10, b=10),
-                annotations=annotations,
-                xaxis=dict(
-                    title_font=dict(size=16),   # ← x-axis title size
-                    tickfont=dict(size=14),     # ← x-axis tick numbers size
-            ),
-                yaxis=dict(
-                    title_font=dict(size=16),   # ← y-axis title size
-                    tickfont=dict(size=14),     # ← y-axis tick numbers size
-                ),
-            )
-            return fig
-
+    
 
 with ui.layout_columns(col_widths={"sm": (5, 5, 2)}, row_heights="auto"):
 
@@ -762,7 +723,7 @@ with ui.layout_columns(col_widths={"sm": (5, 5, 2)}, row_heights="auto"):
             return fig
 
 
-with ui.layout_columns(col_widths={"sm": (10, 2)}, row_heights="auto"):
+with ui.layout_columns(col_widths={"sm": (7, 5)}, row_heights="auto"):
 
     # 5. Stock Metrics Table
     with ui.card(full_screen=True):
@@ -829,77 +790,156 @@ with ui.layout_columns(col_widths={"sm": (10, 2)}, row_heights="auto"):
                 filters=False,
                 selection_mode="rows",
             )
-    # 8. Watchlist Display
-    with ui.card():
-        ui.card_header("Watchlist & Alerts")
-        ui.input_switch("watchlist_toggle", "Show as $ or %", value=False)
-
-        @render.data_frame
-        def render_watchlist():
+        
+    # 6. Risk-Return Scatter Plot
+    with ui.card(full_screen=True):
+        with ui.card_header():
+            ui.div(
+                ui.div("Risk-Return Profile", style="font-weight:700;"),
+                ui.input_selectize(
+                    "rr_period",
+                    None,
+                    choices=["Full", "1Y", "5Y", "10Y"],
+                    selected="Full",
+                ),
+                style="display:flex; justify-content:space-between; align-items:center; width:100%;",
+            )
+        @render_plotly
+        def rr_plot():
             """
-            8. Watchlist Display.
-            Table of watchlist stocks (from wishlist.csv) with Symbol, Company,
-            and Change (colored red/green). Global toggle for percentage vs dollar.
-            Reacts to: neither dropdown nor date range.
+            6. Risk-Return Scatter Plot.
+            Scatter plot of risk (volatility) vs return for all portfolio stocks.
+            Selected stock highlighted. Reacts to: dropdown only (uses selected date range).
+            Data: Calculate from close.csv; highlight selected stock.
             """
-            current_prices = wishlist_df.iloc[-1]
-            previous_prices = wishlist_df.iloc[-2]
+            rr = risk_return_df()
+            hi = input.ticker()
 
-            watchlist_data = []
-            for ticker in wishlist_dict.keys():
-                current = current_prices[ticker]
-                previous = previous_prices[ticker]
-                dollar_change = current - previous
-                percent_change = (dollar_change / previous) * 100
+            X_MIN, X_MAX = 0.0, 1.0
+            Y_MIN, Y_MAX = -0.10, 1.0
 
-                if input.watchlist_toggle():
-                    change_value = f"{percent_change:+.2f}%"
-                else:
-                    change_value = f"${dollar_change:+.2f}"
-
-                watchlist_data.append(
-                    {
-                        "Symbol": ticker,
-                        "Change": change_value,
-                    }
-                )
-
-            df = pd.DataFrame(watchlist_data)
-
-            return render.DataTable(
-                df,
-                styles=[
-                    {
-                        "rows": [
-                            i
-                            for i, row in enumerate(watchlist_data)
-                            if "-" not in row["Change"]
-                        ],
-                        "cols": [0, 1],
-                        "style": {
-                            "color": "#44bb70",
-                            "font-weight": "600",
-                            "background-color": "transparent",
-                        },
-                    },
-                    {
-                        "rows": [
-                            i
-                            for i, row in enumerate(watchlist_data)
-                            if "-" in row["Change"]
-                        ],
-                        "cols": [0, 1],
-                        "style": {
-                            "color": "#d62728",
-                            "font-weight": "600",
-                            "background-color": "transparent",
-                        },
-                    },
-                ],
-                filters=False,
-                selection_mode="none",
+            LAYOUT_BASE = dict(
+                template="plotly_dark",
+                height=520,
+                autosize=True,
+                margin=dict(l=60, r=30, t=20, b=60),
+                xaxis_title="Annualized Volatility",
+                yaxis_title="Annualized Return",
+                xaxis=dict(
+                    range=[X_MIN, X_MAX],
+                    autorange=False,
+                    fixedrange=True,
+                    tickformat=".0%",
+                    tickmode="linear",
+                    tick0=0,
+                    dtick=0.2,
+                ),
+                yaxis=dict(
+                    range=[Y_MIN, Y_MAX],
+                    autorange=False,
+                    fixedrange=True,
+                    tickformat=".0%",
+                    tickmode="linear",
+                    tick0=-0.1,
+                    dtick=0.2,
+                ),
             )
 
+            if rr is None or rr.empty:
+                fig = go.Figure()
+                fig.update_layout(
+                    **LAYOUT_BASE,
+                    annotations=[
+                        dict(
+                            text="No data in selected range",
+                            x=0.5,
+                            y=0.5,
+                            xref="paper",
+                            yref="paper",
+                            showarrow=False,
+                            font=dict(size=16),
+                        )
+                    ],
+                )
+                return fig
+
+            rr = rr.copy()
+            rr["AnnVol"] = pd.to_numeric(rr["AnnVol"], errors="coerce")
+            rr["AnnReturn"] = pd.to_numeric(rr["AnnReturn"], errors="coerce")
+            rr = rr.dropna(subset=["Ticker", "AnnVol", "AnnReturn"])
+            rr["AnnVol"] = rr["AnnVol"].clip(X_MIN, X_MAX)
+            rr["AnnReturn"] = rr["AnnReturn"].clip(Y_MIN, Y_MAX)
+            rr = rr.reset_index(drop=True)
+
+            # ── Label only the selected stock ─────────────────────────────────────
+            annotations = []
+            sel_rows = rr[rr["Ticker"] == hi]
+            if not sel_rows.empty:
+                i = sel_rows.index[0]
+                annotations.append(
+                    dict(
+                        x=rr.at[i, "AnnVol"],
+                        y=rr.at[i, "AnnReturn"] + 0.035,
+                        text=rr.at[i, "Ticker"],
+                        showarrow=False,
+                        font=dict(size=13, color="white"),
+                        xanchor="center",
+                        yanchor="bottom",
+                    )
+                )
+
+            others = rr[rr["Ticker"] != hi]
+            selected = rr[rr["Ticker"] == hi]
+
+            fig = go.Figure()
+
+            fig.add_trace(
+                go.Scatter(
+                    x=others["AnnVol"],
+                    y=others["AnnReturn"],
+                    mode="markers",  # ← markers only, NO text mode
+                    marker=dict(size=12, opacity=0.65, color="#4a9eff"),
+                    hovertemplate="Ticker = %{customdata}<br>Volatility = %{x:.2%}<br>Return = %{y:.2%}<extra></extra>",
+                    customdata=others["Ticker"],
+                    showlegend=False,
+                )
+            )
+
+            if not selected.empty:
+                fig.add_trace(
+                    go.Scatter(
+                        x=selected["AnnVol"],
+                        y=selected["AnnReturn"],
+                        mode="markers",  # ← markers only, NO text mode
+                        marker=dict(
+                            size=18, opacity=1.0, line=dict(width=2, color="white"), color="#ff6b35"
+                        ),
+                        hovertemplate="Ticker = %{customdata}<br>Volatility = %{x:.2%}<br>Return = %{y:.2%}<extra></extra>",
+                        customdata=selected["Ticker"],
+                        showlegend=False,
+                    )
+                )
+
+            fig.update_xaxes(range=[X_MIN, X_MAX], autorange=False)
+            fig.update_yaxes(range=[Y_MIN, Y_MAX], autorange=False)
+            fig.update_layout(
+                template="plotly_dark",
+                yaxis_title="Annualized Return",
+                xaxis_title="Annualized Volatility",
+                margin=dict(l=10, r=10, t=10, b=10),
+                annotations=annotations,
+                xaxis=dict(
+                    title_font=dict(size=18),   # ← x-axis title size
+                    tickfont=dict(size=15),     # ← x-axis tick numbers size
+            ),
+                yaxis=dict(
+                    title_font=dict(size=18),   # ← y-axis title size
+                    tickfont=dict(size=15),     # ← y-axis tick numbers size
+                ),
+            )
+            return fig
+
+   
 
 # -----------------------------------------------------------------------------
 # Apply finviz-inspired styles
