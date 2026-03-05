@@ -1,6 +1,5 @@
 """
-Stock Visualization Dashboard - Magnificent 7 Portfolio
-Finviz-inspired design with 8 visualization components.
+Magnificent 7 · Portfolio Intelligence Dashboard
 """
 
 from pathlib import Path
@@ -255,7 +254,7 @@ with ui.layout_columns(col_widths={"sm": (4, 4, 4)}, row_heights="auto"):
 
     # 1. Current Price Display
     with ui.card():
-        ui.card_header("1. Current Price")
+        ui.card_header("Live Market Snapshot")
 
         @render.ui
         def render_current_price():
@@ -312,7 +311,7 @@ with ui.layout_columns(col_widths={"sm": (4, 4, 4)}, row_heights="auto"):
 
     # 2. Stock Price Chart
     with ui.card(full_screen=True):
-        ui.card_header("2. Stock Price Chart")
+        ui.card_header("Historical Closing Price Trend")
 
         @render_plotly
         def render_stock_price_chart():
@@ -397,7 +396,7 @@ with ui.layout_columns(col_widths={"sm": (4, 4, 4)}, row_heights="auto"):
 
     # 6. Risk-Return Scatter Plot
     with ui.card(full_screen=True):
-        ui.card_header("6. Risk-Return Scatter")
+        ui.card_header("Risk-Return Profile")
 
         @render_plotly
         def rr_plot():
@@ -572,7 +571,7 @@ with ui.layout_columns(col_widths={"sm": (5, 5, 2)}, row_heights="auto"):
 
     # 3. Performance Comparison
     with ui.card(full_screen=True):
-        ui.card_header("3. Performance Comparison")
+        ui.card_header("Relative Performance Comparison")
 
         @render_plotly
         def render_performance_comparison():
@@ -647,7 +646,7 @@ with ui.layout_columns(col_widths={"sm": (5, 5, 2)}, row_heights="auto"):
 
     # 4. S&P 500 Comparison
     with ui.card(full_screen=True):
-        ui.card_header("4. S&P 500 Comparison")
+        ui.card_header("Price Performance vs. S&P 500 Benchmark")
 
         @render_plotly
         def render_sp500_comparison():
@@ -719,7 +718,7 @@ with ui.layout_columns(col_widths={"sm": (5, 5, 2)}, row_heights="auto"):
 
     # 7. Portfolio Treemap
     with ui.card(full_screen=True):
-        ui.card_header("7. Portfolio Treemap")
+        ui.card_header("Portfolio Weight & Allocation Map")
 
         @render_plotly
         def render_portfolio_treemap():
@@ -773,7 +772,7 @@ with ui.layout_columns(col_widths={"sm": (10, 2)}, row_heights="auto"):
 
     # 5. Stock Metrics Table
     with ui.card(full_screen=True):
-        ui.card_header("5. Stock Metrics Table")
+        ui.card_header("Fundamental Metrics Overview")
 
         with ui.layout_columns(col_widths=[7, 5]):
             ui.input_select(
@@ -838,7 +837,7 @@ with ui.layout_columns(col_widths={"sm": (10, 2)}, row_heights="auto"):
             )
     # 8. Watchlist Display
     with ui.card():
-        ui.card_header("8. Watchlist")
+        ui.card_header("Watchlist & Alerts")
         ui.input_switch("watchlist_toggle", "Show as $ or %", value=False)
 
         @render.data_frame
