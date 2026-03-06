@@ -31,5 +31,7 @@ dependencies:
   - duckdb
   - pip:
       - curl_cffi
+      - python-dotenv  
+      - shinychat          
       
 
