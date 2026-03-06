@@ -212,11 +212,11 @@ label {
   }
 }
 
-/* Sidebar toggle button visibility in dark mode, white icon to collapse/ expand */
+/* Sidebar toggle button visibility in dark mode, white icon '<' to collapse/ expand */
 .bslib-sidebar-layout > .collapse-toggle {
     color: #d1d4dc !important;
-    background-color: #2a2e39 !important;
-    border: 1px solid #444c5e !important;
+    background-color: #3c3f45 !important;
+    border: 1px solid #6f7071 !important;
     opacity: 1 !important;
 }
 
