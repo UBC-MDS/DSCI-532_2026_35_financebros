@@ -7,8 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Latest Release
 
+## [0.3.0]
+
 ### Added
 - Added `rr_period` time window selector (Full / 1Y / 5Y / 10Y) inside the Risk-Return Profile card header for in-chart filtering
+- Added a CSS rule to make toggle sidebar visible, added hover colours and default button colours to styles.css file
 
 ### Changed
 - Renamed all 8 dashboard components and dashboard title to more descriptive, professional names
