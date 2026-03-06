@@ -9,8 +9,12 @@ stocks = {
     "TSLA": "Tesla",
 }
 
-wishlist = {
+watchlist = {
     "MU": "Micron",
     "AMD": "Advanced Micro Devices",
     "NFLX": "Netflix",
+    "INTC": "Intel",
+    "QCOM": "Qualcomm",
+    "CRM": "Salesforce",
+    "ORCL": "Oracle",
 }
