@@ -12,7 +12,7 @@ from shiny import reactive
 from shiny.express import input, render, ui
 from shinywidgets import render_plotly, output_widget
 
-from stocks import stocks, wishlist as wishlist_dict
+from stocks import stocks, watchlist as watchlist_dict
 
 # -----------------------------------------------------------------------------
 # Data Loading - Load CSV files once at startup
@@ -22,7 +22,7 @@ DATA_DIR = Path(__file__).parent.parent / "data"
 close_df = pd.read_csv(DATA_DIR / "close.csv", parse_dates=["Date"])
 metric_df = pd.read_csv(DATA_DIR / "metric.csv")
 spy_df = pd.read_csv(DATA_DIR / "spy.csv", parse_dates=["Date"])
-wishlist_df = pd.read_csv(DATA_DIR / "wishlist.csv", parse_dates=["Date"])
+watchlist_df = pd.read_csv(DATA_DIR / "watchlist.csv", parse_dates=["Date"])
 
 # Date range from close.csv
 DATE_MIN = close_df["Date"].min().date()
@@ -33,7 +33,8 @@ DATE_MAX = close_df["Date"].max().date()
 # -----------------------------------------------------------------------------
 ui.page_opts(title="Magnificent 7 Stock Explorer", fillable=True)
 
-ui.tags.style("""
+ui.tags.style(
+    """
 /* Finviz-style strip */
 .tickerstrip {
   display: flex;
@@ -171,7 +172,8 @@ label[for="metrics_sort_dir"] {
 #rr_period + .selectize-control .selectize-dropdown {
     font-size: 17px !important;
 }     
-""")
+"""
+)
 
 # -----------------------------------------------------------------------------
 # Sidebar - Stock dropdown and date range
@@ -293,13 +295,16 @@ def risk_return_df():
     mean_daily = rets.mean()
     std_daily = rets.std()
 
-    out = pd.DataFrame({
-        "Ticker": mean_daily.index,
-        "AnnReturn": mean_daily.values * 252,
-        "AnnVol": std_daily.values * np.sqrt(252),
-    }).dropna()
+    out = pd.DataFrame(
+        {
+            "Ticker": mean_daily.index,
+            "AnnReturn": mean_daily.values * 252,
+            "AnnVol": std_daily.values * np.sqrt(252),
+        }
+    ).dropna()
 
     return out.reset_index(drop=True)
+
 
 # -----------------------------------------------------------------------------
 # Layout - 3-column grid matching sketch.png
@@ -307,73 +312,16 @@ def risk_return_df():
 # Row 2: 3 (Performance), 4 (S&P 500), 7 (Treemap)
 # Row 3: 5 (Metrics Table), 8 (Watchlist)
 # -----------------------------------------------------------------------------
-with ui.layout_columns(col_widths={"sm": (4, 4, 4)}, row_heights="auto"):
+with ui.layout_columns(col_widths={"sm": (7, 3, 2)}, row_heights="auto"):
 
-    # 1. Current Price Display
-    with ui.card():
-        ui.card_header("Live Market Snapshot")
-
-        @render.ui
-        def render_current_price():
-            """
-            1. Current Price Display.
-            Display current stock price. Reacts to dropdown only (not date range).
-            Uses the most recent price from close.csv regardless of selected date range.
-            Data: Last row from close.csv for selected stock.
-            """
-            cur = close_df.iloc[-1]
-            prev = close_df.iloc[-2]
-
-            boxes = []
-            for ticker in close_df.columns[1:]:  
-                if ticker not in close_df.columns:
-                    boxes.append(
-                        ui.tags.div(
-                            {"class": "tickerbox"},
-                            ui.tags.div(ticker, class_="tickerbox-ticker"),
-                            ui.tags.div("—", class_="tickerbox-price"),
-                            ui.tags.div("—", class_="tickerbox-ret ret-flat"),
-                        )
-                    )
-                    continue
-
-                current = float(cur[ticker])
-                previous = float(prev[ticker])
-
-                pct = 0.0 if previous == 0 else (current / previous - 1.0) * 100
-
-                if pct > 0.05:
-                    cls = "ret-pos"
-                    arrow = "▲"
-                elif pct < -0.05:
-                    cls = "ret-neg"
-                    arrow = "▼"
-                else:
-                    cls = "ret-flat"
-                    arrow = "•"
-
-                pct_txt = f"{arrow}{pct:.2f}%"
-
-                boxes.append(
-                    ui.tags.div(
-                        {"class": "tickerbox"},
-                        ui.tags.div(ticker, class_="tickerbox-ticker"),
-                        ui.tags.div(f"${current:,.2f}", class_="tickerbox-price"),
-                        ui.tags.div(pct_txt, class_=f"tickerbox-ret {cls}"),
-                    )
-                )
-
-            return ui.tags.div({"class": "tickerstrip"}, *boxes)
-            
-
-    # 2. Stock Price Chart
+    # 1. Stock Price Chart
     with ui.card(full_screen=True):
         ui.card_header("Historical Closing Price Trend")
 
         @render_plotly
         def render_stock_price_chart():
             """
-            2. Stock Price Chart.
+            1. Stock Price Chart.
             Line graph of stock price from start to end of selected date range.
             Reacts to: dropdown + date range.
             Data: Filtered close.csv for selected stock and date range.
@@ -391,20 +339,26 @@ with ui.layout_columns(col_widths={"sm": (4, 4, 4)}, row_heights="auto"):
                     annotations=[
                         dict(
                             text="No data available for the selected range/ticker.",
-                            x=0.5, y=0.5, xref="paper", yref="paper",
-                            showarrow=False, font=dict(color="#d1d4dc", size=14)
+                            x=0.5,
+                            y=0.5,
+                            xref="paper",
+                            yref="paper",
+                            showarrow=False,
+                            font=dict(color="#d1d4dc", size=14),
                         )
                     ],
                 )
                 return fig
-            
+
             df = df.sort_values("Date")
             x = df["Date"]
             y = df[ticker].astype(float)
 
             start_price = float(y.iloc[0])
             end_price = float(y.iloc[-1])
-            pct_change = (end_price / start_price - 1) * 100 if start_price != 0 else 0.0
+            pct_change = (
+                (end_price / start_price - 1) * 100 if start_price != 0 else 0.0
+            )
             pct_color = "#44bb70" if pct_change >= 0 else "#d62728"
 
             fig = go.Figure()
@@ -416,7 +370,7 @@ with ui.layout_columns(col_widths={"sm": (4, 4, 4)}, row_heights="auto"):
                     name=ticker,
                     line=dict(color="#2962ff", width=2.5),
                     hovertemplate="<b>%{x|%Y-%m-%d}</b><br>"
-                                f"{ticker}: $%{{y:.2f}}<extra></extra>",
+                    f"{ticker}: $%{{y:.2f}}<extra></extra>",
                 )
             )
 
@@ -449,8 +403,90 @@ with ui.layout_columns(col_widths={"sm": (4, 4, 4)}, row_heights="auto"):
             )
 
             return fig
-            
-     # 8. Watchlist Display
+
+    # 2. Current Price + Portfolio Treemap (combined)
+    with ui.card():
+        ui.card_header("Portfolio Overview")
+
+        @render_plotly
+        def render_current_price():
+            """
+            Combined: Market cap treemap with current price and day-over-day change.
+            Green = price up, red = price down. Selected ticker highlighted (full contrast),
+            others dimmed. Reacts to dropdown only.
+            """
+            selected_ticker = input.ticker()
+            cur = close_df.iloc[-1]
+            prev = close_df.iloc[-2]
+
+            GREEN = "#44bb70"
+            RED = "#d62728"
+            GRAY = "#787b86"
+            DIM_OPACITY = 0.45
+
+            labels = []
+            values = []
+            text_info = []
+            colors = []
+            customdata_list = []
+
+            for _, row in metric_df.iterrows():
+                ticker = str(row["Ticker"])
+                if ticker not in close_df.columns:
+                    continue
+                market_cap = row["MarketCap"]
+                current = float(cur[ticker])
+                previous = float(prev[ticker])
+                pct = 0.0 if previous == 0 else (current / previous - 1.0) * 100
+
+                if pct > 0.05:
+                    base_color = GREEN
+                    arrow = "▲"
+                elif pct < -0.05:
+                    base_color = RED
+                    arrow = "▼"
+                else:
+                    base_color = GRAY
+                    arrow = "•"
+
+                is_selected = ticker == selected_ticker
+                if is_selected:
+                    colors.append(base_color)
+                else:
+                    r, g, b = (
+                        int(base_color[1:3], 16),
+                        int(base_color[3:5], 16),
+                        int(base_color[5:7], 16),
+                    )
+                    colors.append(f"rgba({r},{g},{b},{DIM_OPACITY})")
+
+                labels.append(ticker)
+                values.append(market_cap)
+                price_change_txt = f"${current:,.2f} {arrow}{pct:.2f}%"
+                text_info.append(price_change_txt)
+                customdata_list.append([current, pct])
+
+            fig = go.Figure(
+                go.Treemap(
+                    labels=labels,
+                    parents=[""] * len(labels),
+                    values=values,
+                    text=text_info,
+                    textposition="middle center",
+                    customdata=customdata_list,
+                    marker=dict(colors=colors, line=dict(color="#2a2e39", width=2)),
+                    hovertemplate="<b>%{label}</b><br>Price: $%{customdata[0]:,.2f}<br>Change: %{customdata[1]:+.2f}%<br>Market Cap: $%{value:,.0f}<extra></extra>",
+                )
+            )
+            fig.update_layout(
+                paper_bgcolor="#131722",
+                plot_bgcolor="#1e222d",
+                font=dict(color="#d1d4dc", size=14),
+                margin=dict(l=10, r=10, t=10, b=10),
+            )
+            return fig
+
+    # 3. Watchlist Display
     with ui.card():
         ui.card_header("Watchlist & Alerts")
         ui.input_switch("watchlist_toggle", "Show as $ or %", value=False)
@@ -458,16 +494,16 @@ with ui.layout_columns(col_widths={"sm": (4, 4, 4)}, row_heights="auto"):
         @render.data_frame
         def render_watchlist():
             """
-            8. Watchlist Display.
-            Table of watchlist stocks (from wishlist.csv) with Symbol, Company,
+            3. Watchlist Display.
+            Table of watchlist stocks (from watchlist.csv) with Symbol, Company,
             and Change (colored red/green). Global toggle for percentage vs dollar.
             Reacts to: neither dropdown nor date range.
             """
-            current_prices = wishlist_df.iloc[-1]
-            previous_prices = wishlist_df.iloc[-2]
+            current_prices = watchlist_df.iloc[-1]
+            previous_prices = watchlist_df.iloc[-2]
 
             watchlist_data = []
-            for ticker in wishlist_dict.keys():
+            for ticker in watchlist_dict.keys():
                 current = current_prices[ticker]
                 previous = previous_prices[ticker]
                 dollar_change = current - previous
@@ -520,9 +556,9 @@ with ui.layout_columns(col_widths={"sm": (4, 4, 4)}, row_heights="auto"):
                 filters=False,
                 selection_mode="none",
             )
-    
 
-with ui.layout_columns(col_widths={"sm": (5, 5, 2)}, row_heights="auto"):
+
+with ui.layout_columns(col_widths={"sm": (7, 5)}, row_heights="auto"):
 
     # 3. Performance Comparison
     with ui.card(full_screen=True):
@@ -671,57 +707,6 @@ with ui.layout_columns(col_widths={"sm": (5, 5, 2)}, row_heights="auto"):
             # pass
             # return go.Figure()
 
-    # 7. Portfolio Treemap
-    with ui.card(full_screen=True):
-        ui.card_header("Portfolio Weight & Allocation Map")
-
-        @render_plotly
-        def render_portfolio_treemap():
-            """
-            7. Portfolio Treemap.
-            Treemap of portfolio sized by market cap. Selected stock highlighted.
-            Reacts to: dropdown only. Data: MarketCap from metric.csv.
-            """
-            selected_ticker = input.ticker()
-
-            labels = []
-            values = []
-            text_info = []
-            colors = []
-
-            for _, row in metric_df.iterrows():
-                ticker = str(row["Ticker"])
-                company_name = stocks.get(ticker, ticker)
-                labels.append(f"{ticker}")
-                values.append(row["MarketCap"])
-                text_info.append(f"{company_name}")
-
-                if ticker == selected_ticker:
-                    colors.append("#2962ff")
-                else:
-                    colors.append("#787b86")
-
-            fig = go.Figure(
-                go.Treemap(
-                    labels=labels,
-                    parents=[""] * len(labels),
-                    values=values,
-                    text=text_info,
-                    textposition="middle center",
-                    marker=dict(colors=colors, line=dict(color="#2a2e39", width=2)),
-                    hovertemplate="<b>%{label}</b><br>%{text}<br>Market Cap: $%{value:,.0f}<extra></extra>",
-                )
-            )
-
-            fig.update_layout(
-                paper_bgcolor="#131722",
-                plot_bgcolor="#1e222d",
-                font=dict(color="#d1d4dc", size=14),
-                margin=dict(l=10, r=10, t=10, b=10),
-            )
-
-            return fig
-
 
 with ui.layout_columns(col_widths={"sm": (7, 5)}, row_heights="auto"):
 
@@ -757,7 +742,7 @@ with ui.layout_columns(col_widths={"sm": (7, 5)}, row_heights="auto"):
                 df = df.drop(columns=["Unnamed: 0"])
 
             sort_key = input.metrics_sort_by()
-            ascending = (input.metrics_sort_dir() == "asc")
+            ascending = input.metrics_sort_dir() == "asc"
 
             # Sort BEFORE formatting on numeric values
             if sort_key in df.columns:
@@ -777,11 +762,15 @@ with ui.layout_columns(col_widths={"sm": (7, 5)}, row_heights="auto"):
 
             if "DividendYield" in df.columns:
                 dy = pd.to_numeric(df["DividendYield"], errors="coerce") * 100
-                df["DividendYield"] = dy.map(lambda x: "" if pd.isna(x) else f"{x:.2f}%")
+                df["DividendYield"] = dy.map(
+                    lambda x: "" if pd.isna(x) else f"{x:.2f}%"
+                )
 
             if "Revenue Growth" in df.columns:
                 rg = pd.to_numeric(df["Revenue Growth"], errors="coerce") * 100
-                df["Revenue Growth"] = rg.map(lambda x: "" if pd.isna(x) else f"{x:.2f}%")
+                df["Revenue Growth"] = rg.map(
+                    lambda x: "" if pd.isna(x) else f"{x:.2f}%"
+                )
 
             return render.DataGrid(
                 df,
@@ -790,7 +779,7 @@ with ui.layout_columns(col_widths={"sm": (7, 5)}, row_heights="auto"):
                 filters=False,
                 selection_mode="rows",
             )
-        
+
     # 6. Risk-Return Scatter Plot
     with ui.card(full_screen=True):
         with ui.card_header():
@@ -804,6 +793,7 @@ with ui.layout_columns(col_widths={"sm": (7, 5)}, row_heights="auto"):
                 ),
                 style="display:flex; justify-content:space-between; align-items:center; width:100%;",
             )
+
         @render_plotly
         def rr_plot():
             """
@@ -912,7 +902,10 @@ with ui.layout_columns(col_widths={"sm": (7, 5)}, row_heights="auto"):
                         y=selected["AnnReturn"],
                         mode="markers",  # ← markers only, NO text mode
                         marker=dict(
-                            size=18, opacity=1.0, line=dict(width=2, color="white"), color="#ff6b35"
+                            size=18,
+                            opacity=1.0,
+                            line=dict(width=2, color="white"),
+                            color="#ff6b35",
                         ),
                         hovertemplate="Ticker = %{customdata}<br>Volatility = %{x:.2%}<br>Return = %{y:.2%}<extra></extra>",
                         customdata=selected["Ticker"],
@@ -929,17 +922,16 @@ with ui.layout_columns(col_widths={"sm": (7, 5)}, row_heights="auto"):
                 margin=dict(l=10, r=10, t=10, b=10),
                 annotations=annotations,
                 xaxis=dict(
-                    title_font=dict(size=18),   # ← x-axis title size
-                    tickfont=dict(size=15),     # ← x-axis tick numbers size
-            ),
+                    title_font=dict(size=18),  # ← x-axis title size
+                    tickfont=dict(size=15),  # ← x-axis tick numbers size
+                ),
                 yaxis=dict(
-                    title_font=dict(size=18),   # ← y-axis title size
-                    tickfont=dict(size=15),     # ← y-axis tick numbers size
+                    title_font=dict(size=18),  # ← y-axis title size
+                    tickfont=dict(size=15),  # ← y-axis tick numbers size
                 ),
             )
             return fig
 
-   
 
 # -----------------------------------------------------------------------------
 # Apply finviz-inspired styles
