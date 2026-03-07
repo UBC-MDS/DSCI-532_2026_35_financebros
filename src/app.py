@@ -1,6 +1,5 @@
 """
-Stock Visualization Dashboard - Magnificent 7 Portfolio
-Finviz-inspired design with 8 visualization components.
+Magnificent 7 · Portfolio Intelligence Dashboard
 """
 
 from pathlib import Path
@@ -18,7 +17,7 @@ from dotenv import load_dotenv
 import io
 
 
-from stocks import stocks, wishlist as wishlist_dict
+from stocks import stocks, watchlist as watchlist_dict
 
 # -----------------------------------------------------------------------------
 # Data Loading - Load CSV files once at startup
@@ -30,7 +29,7 @@ load_dotenv(DATA_DIR.parent / ".env", override=True)
 close_df = pd.read_csv(DATA_DIR / "close.csv", parse_dates=["Date"])
 metric_df = pd.read_csv(DATA_DIR / "metric.csv")
 spy_df = pd.read_csv(DATA_DIR / "spy.csv", parse_dates=["Date"])
-wishlist_df = pd.read_csv(DATA_DIR / "wishlist.csv", parse_dates=["Date"])
+watchlist_df = pd.read_csv(DATA_DIR / "watchlist.csv", parse_dates=["Date"])
 
 # Date range from close.csv
 DATE_MIN = close_df["Date"].min().date()
@@ -41,7 +40,8 @@ DATE_MAX = close_df["Date"].max().date()
 # -----------------------------------------------------------------------------
 ui.page_opts(title="Magnificent 7 Stock Explorer", fillable=True)
 
-ui.tags.style("""
+ui.tags.style(
+    """
 /* Finviz-style strip */
 .tickerstrip {
   display: flex;
@@ -270,14 +270,19 @@ def analysis_close():
 
 @reactive.calc
 def risk_return_df():
-    """
-    From analysis_close(), compute annualized return + annualized volatility per ticker.
-    """
     df = analysis_close()
+    period = input.rr_period()  # ← must be at the TOP so reactive knows to watch it
+
     if df.empty:
         return pd.DataFrame(columns=["Ticker", "AnnReturn", "AnnVol"])
 
     prices = df.set_index("Date")[RR_TICKERS].astype(float)
+
+    if period != "Full":
+        years = int(period.replace("Y", ""))
+        cutoff = pd.Timestamp.today() - pd.DateOffset(years=years)
+        prices = prices[prices.index >= cutoff]
+
     rets = prices.pct_change().dropna(how="all")
 
     if rets.empty:

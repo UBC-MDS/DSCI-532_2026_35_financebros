@@ -1,5 +1,5 @@
 # Data files - prevent overwriting local data
-data/*
+#data/*
 
 # Keep the data folder structure
 !data/.gitkeep
