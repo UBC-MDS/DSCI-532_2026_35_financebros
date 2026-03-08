@@ -224,3 +224,20 @@ label {
     background-color: #3a4255 !important;
     color: #ffffff !important;
 }
+
+
+/*responsive card heights using viewport units */
+.bslib-card {
+  height: 28vh !important;
+}
+
+.bslib-card .card-body {
+  height: calc(28vh - 40px) !important; /* makes charts fill whatever space the card gives them, subtract to avoid overflow */
+  overflow: hidden !important;
+}
+
+.js-plotly-plot,
+.plotly,
+.plotly > div {
+  height: 100% !important;
+}

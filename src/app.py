@@ -410,6 +410,7 @@ with ui.navset_tab(id="main_tabs"):
                             fig = go.Figure()
                             fig.update_layout(
                                 template="plotly_dark",
+                                autosize=True,
                                 paper_bgcolor="#131722",
                                 plot_bgcolor="#1e222d",
                                 margin=dict(l=10, r=10, t=10, b=10),
@@ -897,7 +898,7 @@ with ui.navset_tab(id="main_tabs"):
 
                         LAYOUT_BASE = dict(
                             template="plotly_dark",
-                            height=520,
+                            #height=520,
                             autosize=True,
                             margin=dict(l=60, r=30, t=20, b=60),
                             xaxis_title="Annualized Volatility",
