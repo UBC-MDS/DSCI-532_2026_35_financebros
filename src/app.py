@@ -389,7 +389,7 @@ with ui.navset_tab(id="main_tabs"):
                     selected="AAPL",
                 )
 
-            with ui.layout_columns(col_widths={"sm": (7, 3, 2)}, row_heights="auto"):
+            with ui.layout_columns(col_widths={"sm": (7, 3, 2)}, row_heights="250px"): #"auto"):
 
                 # 1. Stock Price Chart (app2)
                 with ui.card(full_screen=True):
@@ -634,7 +634,7 @@ with ui.navset_tab(id="main_tabs"):
                             selection_mode="none",
                         )
 
-            with ui.layout_columns(col_widths={"sm": (7, 5)}, row_heights="auto"):
+            with ui.layout_columns(col_widths={"sm": (7, 5)}, row_heights="250px"): #"auto"):
 
                 # 3. Performance Comparison (app2)
                 with ui.card(full_screen=True):
@@ -780,7 +780,7 @@ with ui.navset_tab(id="main_tabs"):
 
                         return fig
 
-            with ui.layout_columns(col_widths={"sm": (7, 5)}, row_heights="auto"):
+            with ui.layout_columns(col_widths={"sm": (7, 5)}, row_heights="300px"): #"auto"):
 
                 # 5. Stock Metrics Table (app2)
                 with ui.card(full_screen=True):
@@ -897,7 +897,7 @@ with ui.navset_tab(id="main_tabs"):
 
                         LAYOUT_BASE = dict(
                             template="plotly_dark",
-                            height=520,
+                            #height=520,
                             autosize=True,
                             margin=dict(l=60, r=30, t=20, b=60),
                             xaxis_title="Annualized Volatility",
