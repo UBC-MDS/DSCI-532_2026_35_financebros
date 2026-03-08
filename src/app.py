@@ -244,6 +244,30 @@ label[for="metrics_sort_dir"] {
 .bslib-sidebar-layout > .sidebar {
   background-color: #131722 !important;
 }
+/* Sidebar Selectize fix */
+.bslib-sidebar-layout .sidebar .selectize-input {
+  background-color: #1e222d !important;
+  color: #ffffff !important;
+}
+
+.bslib-sidebar-layout .sidebar .selectize-input input {
+  color: #ffffff !important;
+}
+
+.bslib-sidebar-layout .sidebar .selectize-dropdown {
+  background-color: #1e222d !important;
+  color: #ffffff !important;
+  border: 1px solid #2a2e39 !important;
+}
+
+.bslib-sidebar-layout .sidebar .selectize-dropdown .option {
+  color: #d1d4dc !important;
+}
+
+.bslib-sidebar-layout .sidebar .selectize-dropdown .option.active {
+  background-color: #1f6aa5 !important;
+  color: #ffffff !important;
+}
 """
 )
 
