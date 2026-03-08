@@ -25,13 +25,13 @@ dependencies:
   - requests
   - openai
   - anthropic
-  - chatlas
-  - inspect-ai
-  - querychat
   - duckdb
   - pip:
       - curl_cffi
       - python-dotenv  
-      - shinychat          
+      - shinychat   
+      - chatlas
+      - inspect-ai     
+      - querychat  
       
 
