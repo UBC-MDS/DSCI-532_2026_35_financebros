@@ -1056,10 +1056,10 @@ with ui.navset_tab(id="main_tabs"):
         )
 
         with ui.layout_sidebar():
-            with ui.sidebar():
+            with ui.sidebar(width=420):
                 ui.tags.div(
                     {
-                        "style": "height: 400px; overflow-y: auto; display: flex; flex-direction: column;"
+                        "style": "height: 560px; overflow-y: auto; display: flex; flex-direction: column;"
                     },
                     qc.ui(),
                 )
