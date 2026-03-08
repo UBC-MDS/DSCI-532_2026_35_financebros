@@ -435,7 +435,9 @@ with ui.navset_tab(id="main_tabs"):
                         start_price = float(y.iloc[0])
                         end_price = float(y.iloc[-1])
                         pct_change = (
-                            (end_price / start_price - 1) * 100 if start_price != 0 else 0.0
+                            (end_price / start_price - 1) * 100
+                            if start_price != 0
+                            else 0.0
                         )
                         pct_color = "#44bb70" if pct_change >= 0 else "#d62728"
 
@@ -515,7 +517,11 @@ with ui.navset_tab(id="main_tabs"):
                             market_cap = row["MarketCap"]
                             current = float(cur[ticker])
                             previous = float(prev[ticker])
-                            pct = 0.0 if previous == 0 else (current / previous - 1.0) * 100
+                            pct = (
+                                0.0
+                                if previous == 0
+                                else (current / previous - 1.0) * 100
+                            )
 
                             if pct > 0.05:
                                 base_color = GREEN
@@ -552,7 +558,9 @@ with ui.navset_tab(id="main_tabs"):
                                 text=text_info,
                                 textposition="middle center",
                                 customdata=customdata_list,
-                                marker=dict(colors=colors, line=dict(color="#2a2e39", width=2)),
+                                marker=dict(
+                                    colors=colors, line=dict(color="#2a2e39", width=2)
+                                ),
                                 hovertemplate="<b>%{label}</b><br>Price: $%{customdata[0]:,.2f}<br>Change: %{customdata[1]:+.2f}%<br>Market Cap: $%{value:,.0f}<extra></extra>",
                             )
                         )
@@ -898,7 +906,7 @@ with ui.navset_tab(id="main_tabs"):
 
                         LAYOUT_BASE = dict(
                             template="plotly_dark",
-                            #height=520,
+                            # height=520,
                             autosize=True,
                             margin=dict(l=60, r=30, t=20, b=60),
                             xaxis_title="Annualized Volatility",
@@ -943,7 +951,9 @@ with ui.navset_tab(id="main_tabs"):
 
                         rr = rr.copy()
                         rr["AnnVol"] = pd.to_numeric(rr["AnnVol"], errors="coerce")
-                        rr["AnnReturn"] = pd.to_numeric(rr["AnnReturn"], errors="coerce")
+                        rr["AnnReturn"] = pd.to_numeric(
+                            rr["AnnReturn"], errors="coerce"
+                        )
                         rr = rr.dropna(subset=["Ticker", "AnnVol", "AnnReturn"])
                         rr["AnnVol"] = rr["AnnVol"].clip(X_MIN, X_MAX)
                         rr["AnnReturn"] = rr["AnnReturn"].clip(Y_MIN, Y_MAX)
@@ -1039,7 +1049,7 @@ with ui.navset_tab(id="main_tabs"):
         qc = QueryChat(
             qc_data,
             "stocks",
-            client=clt.ChatAnthropic(model="claude-sonnet-4-0"),
+            client=clt.ChatAnthropic(model="claude-3-haiku-20240307"),
             greeting=(
                 "Hello! I am your Finance Bros assistant. And I am at your service. Let me know how I can help you explore the stock data."
             ),
