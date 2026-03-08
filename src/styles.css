@@ -211,3 +211,33 @@ label {
     padding-bottom: 0.25rem;
   }
 }
+
+/* Sidebar toggle button visibility in dark mode, white icon '<' to collapse/ expand */
+.bslib-sidebar-layout > .collapse-toggle {
+    color: #d1d4dc !important;
+    background-color: #3c3f45 !important;
+    border: 1px solid #6f7071 !important;
+    opacity: 1 !important;
+}
+
+.bslib-sidebar-layout > .collapse-toggle:hover {
+    background-color: #3a4255 !important;
+    color: #ffffff !important;
+}
+
+
+/*responsive card heights using viewport units */
+.bslib-card {
+  height: 28vh !important;
+}
+
+.bslib-card .card-body {
+  height: calc(28vh - 40px) !important; /* makes charts fill whatever space the card gives them, subtract to avoid overflow */
+  overflow: hidden !important;
+}
+
+.js-plotly-plot,
+.plotly,
+.plotly > div {
+  height: 100% !important;
+}
