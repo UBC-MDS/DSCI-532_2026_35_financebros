@@ -4,18 +4,16 @@ Magnificent 7 · Portfolio Intelligence Dashboard
 
 from pathlib import Path
 
-
 import pandas as pd
 import numpy as np
 import plotly.graph_objects as go
-from shiny import reactive, ui as core_ui
+from shiny import reactive
 from shiny.express import input, render, ui
 from shinywidgets import render_plotly, output_widget
 from querychat.express import QueryChat
-import chatlas as clt 
+import chatlas as clt
 from dotenv import load_dotenv
 import io
-
 
 from stocks import stocks, watchlist as watchlist_dict
 
@@ -118,10 +116,69 @@ ui.tags.style(
   }
 }
 
-/* ------------------------------------------------------------------
-   QueryChat table: disable hover highlight
------------------------------------------------------------------- */
-.shiny-data-grid table tbody tr:hover,
+/* Fix DataGrid hover in dark mode */
+.shiny-data-grid table tbody tr:hover {
+    background-color: #2a3a4a !important;
+    color: #ffffff !important;
+}
+
+.shiny-data-grid table tbody tr:hover td {
+    background-color: #2a3a4a !important;
+    color: #ffffff !important;
+}
+
+/* Override any inline or inherited styles */
+[data-row]:hover {
+    background-color: #2a3a4a !important;
+    color: #ffffff !important;
+}
+
+/* Card header title - modest size so UI doesn't feel oversized */
+.card-header {
+    font-size: 1rem !important;
+}
+
+/* Labels and controls - standard readable size */
+label[for="metrics_sort_by"],
+label[for="metrics_sort_dir"] {
+    font-size: 0.875rem !important;
+}
+
+/* Sort by - regular select input */
+#metrics_sort_by {
+    font-size: 0.875rem !important;
+    background-color: #ffffff !important;
+    color: #000000 !important;
+    border: 1px solid #cccccc !important;
+}
+
+.selectize-control .selectize-dropdown {
+    font-size: 0.875rem !important;
+    background-color: #ffffff !important;
+    color: #000000 !important;
+}
+
+/* Descending/Ascending radio buttons */
+#metrics_sort_dir label {
+    font-size: 0.875rem !important;
+}
+
+/* Table cell values and headers */
+.shiny-data-grid table td,
+.shiny-data-grid table th {
+    font-size: 0.8125rem !important;
+}
+
+/* Risk-Return period dropdown */
+#rr_period + .selectize-control .selectize-input {
+    font-size: 0.875rem !important;
+}
+
+#rr_period + .selectize-control .selectize-dropdown {
+    font-size: 0.875rem !important;
+}
+
+/* QueryChat table: disable hover highlight */
 .shiny-data-grid .rt-tr:hover,
 .shiny-data-grid .data-grid-row:hover,
 .shiny-data-frame table tbody tr:hover,
@@ -129,9 +186,7 @@ ui.tags.style(
   background-color: transparent !important;
 }
 
-/* ------------------------------------------------------------------
-   ShinyChat: dark theme overrides (best-effort)
------------------------------------------------------------------- */
+/* ShinyChat: dark theme overrides */
 .shinychat-chat,
 .shinychat,
 .shinychat-container {
@@ -164,9 +219,8 @@ ui.tags.style(
 .shinychat-chat .btn {
   border-color: #2a2e39 !important;
 }
-/* ------------------------------------------------------------------
-   Sidebar: force light text so labels are visible in dark mode
------------------------------------------------------------------- */
+
+/* Sidebar: force light text in dark mode */
 .bslib-sidebar-layout .sidebar,
 .bslib-sidebar-layout .sidebar * {
   color: #d1d4dc !important;
@@ -187,11 +241,11 @@ ui.tags.style(
   border: 1px solid #2a2e39 !important;
 }
 
-/* Sidebar background itself */
 .bslib-sidebar-layout > .sidebar {
   background-color: #131722 !important;
 }
-""")
+"""
+)
 
 # -----------------------------------------------------------------------------
 # Reactive Data Calculations
@@ -312,9 +366,8 @@ with ui.navset_tab(id="main_tabs"):
 
     with ui.nav_panel("Dashboard"):
 
-
         # -----------------------------------------------------------------------------
-        # Sidebar - Stock dropdown and date range
+        # Sidebar - Stock dropdown and date range (app2: dates + ticker only)
         # -----------------------------------------------------------------------------
         with ui.layout_sidebar():
             with ui.sidebar():
@@ -336,80 +389,16 @@ with ui.navset_tab(id="main_tabs"):
                     selected="AAPL",
                 )
 
-                ui.input_selectize(
-                    "rr_period",
-                    "Risk/Return Window",
-                    choices=["Full", "1Y", "5Y", "10Y"],
-                    selected="Full",
-                )
+            with ui.layout_columns(col_widths={"sm": (7, 3, 2)}, row_heights="auto"):
 
-            with ui.layout_columns(col_widths={"sm": (4, 4, 4)}, row_heights="auto"):
-
-                # 1. Current Price Display
-                with ui.card():
-                    ui.card_header("1. Current Price")
-
-                    @render.ui
-                    def render_current_price():
-                        """
-                        1. Current Price Display.
-                        Display current stock price. Reacts to dropdown only (not date range).
-                        Uses the most recent price from close.csv regardless of selected date range.
-                        Data: Last row from close.csv for selected stock.
-                        """
-                        cur = close_df.iloc[-1]
-                        prev = close_df.iloc[-2]
-
-                        boxes = []
-                        for ticker in close_df.columns[1:]:  
-                            if ticker not in close_df.columns:
-                                boxes.append(
-                                    ui.tags.div(
-                                        {"class": "tickerbox"},
-                                        ui.tags.div(ticker, class_="tickerbox-ticker"),
-                                        ui.tags.div("—", class_="tickerbox-price"),
-                                        ui.tags.div("—", class_="tickerbox-ret ret-flat"),
-                                    )
-                                )
-                                continue
-
-                            current = float(cur[ticker])
-                            previous = float(prev[ticker])
-
-                            pct = 0.0 if previous == 0 else (current / previous - 1.0) * 100
-
-                            if pct > 0.05:
-                                cls = "ret-pos"
-                                arrow = "▲"
-                            elif pct < -0.05:
-                                cls = "ret-neg"
-                                arrow = "▼"
-                            else:
-                                cls = "ret-flat"
-                                arrow = "•"
-
-                            pct_txt = f"{arrow}{pct:.2f}%"
-
-                            boxes.append(
-                                ui.tags.div(
-                                    {"class": "tickerbox"},
-                                    ui.tags.div(ticker, class_="tickerbox-ticker"),
-                                    ui.tags.div(f"${current:,.2f}", class_="tickerbox-price"),
-                                    ui.tags.div(pct_txt, class_=f"tickerbox-ret {cls}"),
-                                )
-                            )
-
-                        return ui.tags.div({"class": "tickerstrip"}, *boxes)
-                        
-
-                # 2. Stock Price Chart
+                # 1. Stock Price Chart (app2)
                 with ui.card(full_screen=True):
-                    ui.card_header("2. Stock Price Chart")
+                    ui.card_header("Historical Closing Price Trend")
 
                     @render_plotly
                     def render_stock_price_chart():
                         """
-                        2. Stock Price Chart.
+                        1. Stock Price Chart.
                         Line graph of stock price from start to end of selected date range.
                         Reacts to: dropdown + date range.
                         Data: Filtered close.csv for selected stock and date range.
@@ -427,20 +416,26 @@ with ui.navset_tab(id="main_tabs"):
                                 annotations=[
                                     dict(
                                         text="No data available for the selected range/ticker.",
-                                        x=0.5, y=0.5, xref="paper", yref="paper",
-                                        showarrow=False, font=dict(color="#d1d4dc", size=14)
+                                        x=0.5,
+                                        y=0.5,
+                                        xref="paper",
+                                        yref="paper",
+                                        showarrow=False,
+                                        font=dict(color="#d1d4dc", size=14),
                                     )
                                 ],
                             )
                             return fig
-                        
+
                         df = df.sort_values("Date")
                         x = df["Date"]
                         y = df[ticker].astype(float)
 
                         start_price = float(y.iloc[0])
                         end_price = float(y.iloc[-1])
-                        pct_change = (end_price / start_price - 1) * 100 if start_price != 0 else 0.0
+                        pct_change = (
+                            (end_price / start_price - 1) * 100 if start_price != 0 else 0.0
+                        )
                         pct_color = "#44bb70" if pct_change >= 0 else "#d62728"
 
                         fig = go.Figure()
@@ -452,7 +447,7 @@ with ui.navset_tab(id="main_tabs"):
                                 name=ticker,
                                 line=dict(color="#2962ff", width=2.5),
                                 hovertemplate="<b>%{x|%Y-%m-%d}</b><br>"
-                                            f"{ticker}: $%{{y:.2f}}<extra></extra>",
+                                f"{ticker}: $%{{y:.2f}}<extra></extra>",
                             )
                         )
 
@@ -485,186 +480,165 @@ with ui.navset_tab(id="main_tabs"):
                         )
 
                         return fig
-                        
 
-                # 6. Risk-Return Scatter Plot
-                with ui.card(full_screen=True):
-                    ui.card_header("6. Risk-Return Scatter")
+                # 2. Current Price + Portfolio Treemap (app2 combined)
+                with ui.card():
+                    ui.card_header("Portfolio Overview")
 
                     @render_plotly
-                    def rr_plot():
+                    def render_current_price():
                         """
-                        6. Risk-Return Scatter Plot.
-                        Scatter plot of risk (volatility) vs return for all portfolio stocks.
-                        Selected stock highlighted. Reacts to: dropdown only (uses selected date range).
-                        Data: Calculate from close.csv; highlight selected stock.
+                        Combined: Market cap treemap with current price and day-over-day change.
+                        Green = price up, red = price down. Selected ticker highlighted (full contrast),
+                        others dimmed. Reacts to dropdown only.
                         """
-                        rr = risk_return_df()
-                        hi = input.ticker()
+                        selected_ticker = input.ticker()
+                        cur = close_df.iloc[-1]
+                        prev = close_df.iloc[-2]
 
-                        X_MIN, X_MAX = 0.0, 1.0
-                        Y_MIN, Y_MAX = -0.10, 1.0
+                        GREEN = "#44bb70"
+                        RED = "#d62728"
+                        GRAY = "#787b86"
+                        DIM_OPACITY = 0.45
 
-                        LAYOUT_BASE = dict(
-                            template="plotly_dark",
-                            height=520,
-                            autosize=True,
-                            margin=dict(l=60, r=30, t=20, b=60),
-                            xaxis_title="Annualized Volatility",
-                            yaxis_title="Annualized Return",
-                            xaxis=dict(
-                                range=[X_MIN, X_MAX],
-                                autorange=False,
-                                fixedrange=True,
-                                tickformat=".0%",
-                                tickmode="linear",
-                                tick0=0,
-                                dtick=0.2,
-                            ),
-                            yaxis=dict(
-                                range=[Y_MIN, Y_MAX],
-                                autorange=False,
-                                fixedrange=True,
-                                tickformat=".0%",
-                                tickmode="linear",
-                                tick0=-0.1,
-                                dtick=0.2,
-                            ),
-                        )
+                        labels = []
+                        values = []
+                        text_info = []
+                        colors = []
+                        customdata_list = []
 
-                        if rr is None or rr.empty:
-                            fig = go.Figure()
-                            fig.update_layout(
-                                **LAYOUT_BASE,
-                                annotations=[
-                                    dict(
-                                        text="No data in selected range",
-                                        x=0.5,
-                                        y=0.5,
-                                        xref="paper",
-                                        yref="paper",
-                                        showarrow=False,
-                                        font=dict(size=16),
-                                    )
-                                ],
-                            )
-                            return fig
+                        for _, row in metric_df.iterrows():
+                            ticker = str(row["Ticker"])
+                            if ticker not in close_df.columns:
+                                continue
+                            market_cap = row["MarketCap"]
+                            current = float(cur[ticker])
+                            previous = float(prev[ticker])
+                            pct = 0.0 if previous == 0 else (current / previous - 1.0) * 100
 
-                        rr = rr.copy()
-                        rr["AnnVol"] = pd.to_numeric(rr["AnnVol"], errors="coerce")
-                        rr["AnnReturn"] = pd.to_numeric(rr["AnnReturn"], errors="coerce")
-                        rr = rr.dropna(subset=["Ticker", "AnnVol", "AnnReturn"])
-                        rr["AnnVol"] = rr["AnnVol"].clip(X_MIN, X_MAX)
-                        rr["AnnReturn"] = rr["AnnReturn"].clip(Y_MIN, Y_MAX)
-                        rr = rr.reset_index(drop=True)
+                            if pct > 0.05:
+                                base_color = GREEN
+                                arrow = "▲"
+                            elif pct < -0.05:
+                                base_color = RED
+                                arrow = "▼"
+                            else:
+                                base_color = GRAY
+                                arrow = "•"
 
-                        # ── Smart label placement via annotations ─────────────────────────────
-                        x_range = X_MAX - X_MIN
-                        y_range = Y_MAX - Y_MIN
-
-                        offsets = {
-                            "top": (0.00, 0.035),
-                            "bottom": (0.00, -0.035),
-                            "right": (0.05, 0.00),
-                            "left": (-0.05, 0.00),
-                            "top-right": (0.04, 0.030),
-                            "top-left": (-0.04, 0.030),
-                            "bottom-right": (0.04, -0.030),
-                            "bottom-left": (-0.04, -0.030),
-                        }
-
-                        def pick_offset(idx):
-                            xi = (rr.at[idx, "AnnVol"] - X_MIN) / x_range
-                            yi = (rr.at[idx, "AnnReturn"] - Y_MIN) / y_range
-                            neighbours = [j for j in rr.index if j != idx]
-                            best, best_dist = (0.00, 0.035), -1
-                            for dx, dy in offsets.values():
-                                lx, ly = xi + dx, yi + dy
-                                min_d = (
-                                    min(
-                                        (
-                                            (lx - (rr.at[j, "AnnVol"] - X_MIN) / x_range) ** 2
-                                            + (ly - (rr.at[j, "AnnReturn"] - Y_MIN) / y_range) ** 2
-                                        )
-                                        ** 0.5
-                                        for j in neighbours
-                                    )
-                                    if neighbours
-                                    else 1.0
+                            is_selected = ticker == selected_ticker
+                            if is_selected:
+                                colors.append(base_color)
+                            else:
+                                r, g, b = (
+                                    int(base_color[1:3], 16),
+                                    int(base_color[3:5], 16),
+                                    int(base_color[5:7], 16),
                                 )
-                                if min_d > best_dist:
-                                    best_dist = min_d
-                                    best = (dx, dy)
-                            return best
+                                colors.append(f"rgba({r},{g},{b},{DIM_OPACITY})")
 
-                        annotations = []
-                        for i in rr.index:
-                            dx, dy = pick_offset(i)
-                            is_selected = rr.at[i, "Ticker"] == hi
-                            annotations.append(
-                                dict(
-                                    x=rr.at[i, "AnnVol"] + dx * x_range,
-                                    y=rr.at[i, "AnnReturn"] + dy * y_range,
-                                    text=rr.at[i, "Ticker"],
-                                    showarrow=False,
-                                    font=dict(
-                                        size=13 if is_selected else 11,
-                                        color="white" if is_selected else "#aaaaaa",
-                                    ),
-                                    xanchor="center",
-                                    yanchor="middle",
-                                )
-                            )
+                            labels.append(ticker)
+                            values.append(market_cap)
+                            price_change_txt = f"${current:,.2f} {arrow}{pct:.2f}%"
+                            text_info.append(price_change_txt)
+                            customdata_list.append([current, pct])
 
-                        others = rr[rr["Ticker"] != hi]
-                        selected = rr[rr["Ticker"] == hi]
-
-                        fig = go.Figure()
-
-                        fig.add_trace(
-                            go.Scatter(
-                                x=others["AnnVol"],
-                                y=others["AnnReturn"],
-                                mode="markers",  # ← markers only, NO text mode
-                                marker=dict(size=12, opacity=0.65),
-                                hovertemplate="Ticker=%{customdata}<br>Volatility=%{x:.2%}<br>Return=%{y:.2%}<extra></extra>",
-                                customdata=others["Ticker"],
-                                showlegend=False,
+                        fig = go.Figure(
+                            go.Treemap(
+                                labels=labels,
+                                parents=[""] * len(labels),
+                                values=values,
+                                text=text_info,
+                                textposition="middle center",
+                                customdata=customdata_list,
+                                marker=dict(colors=colors, line=dict(color="#2a2e39", width=2)),
+                                hovertemplate="<b>%{label}</b><br>Price: $%{customdata[0]:,.2f}<br>Change: %{customdata[1]:+.2f}%<br>Market Cap: $%{value:,.0f}<extra></extra>",
                             )
                         )
-
-                        if not selected.empty:
-                            fig.add_trace(
-                                go.Scatter(
-                                    x=selected["AnnVol"],
-                                    y=selected["AnnReturn"],
-                                    mode="markers",  # ← markers only, NO text mode
-                                    marker=dict(
-                                        size=18, opacity=1.0, line=dict(width=2, color="white")
-                                    ),
-                                    hovertemplate="Ticker=%{customdata}<br>Volatility=%{x:.2%}<br>Return=%{y:.2%}<extra></extra>",
-                                    customdata=selected["Ticker"],
-                                    showlegend=False,
-                                )
-                            )
-
-                        fig.update_xaxes(range=[X_MIN, X_MAX], autorange=False)
-                        fig.update_yaxes(range=[Y_MIN, Y_MAX], autorange=False)
                         fig.update_layout(
-                            template="plotly_dark",
-                            yaxis_title="Annualized Return",
-                            xaxis_title="Annualized Volatility",
+                            paper_bgcolor="#131722",
+                            plot_bgcolor="#1e222d",
+                            font=dict(color="#d1d4dc", size=14),
                             margin=dict(l=10, r=10, t=10, b=10),
-                            annotations=annotations,
                         )
                         return fig
 
+                # 3. Watchlist Display (app2)
+                with ui.card():
+                    ui.card_header("Watchlist & Alerts")
+                    ui.input_switch("watchlist_toggle", "Show as $ or %", value=False)
 
-            with ui.layout_columns(col_widths={"sm": (5, 5, 2)}, row_heights="auto"):
+                    @render.data_frame
+                    def render_watchlist():
+                        """
+                        3. Watchlist Display.
+                        Table of watchlist stocks (from watchlist.csv) with Symbol, Company,
+                        and Change (colored red/green). Global toggle for percentage vs dollar.
+                        Reacts to: neither dropdown nor date range.
+                        """
+                        current_prices = watchlist_df.iloc[-1]
+                        previous_prices = watchlist_df.iloc[-2]
 
-                # 3. Performance Comparison
+                        watchlist_data = []
+                        for ticker in watchlist_dict.keys():
+                            current = current_prices[ticker]
+                            previous = previous_prices[ticker]
+                            dollar_change = current - previous
+                            percent_change = (dollar_change / previous) * 100
+
+                            if input.watchlist_toggle():
+                                change_value = f"{percent_change:+.2f}%"
+                            else:
+                                change_value = f"${dollar_change:+.2f}"
+
+                            watchlist_data.append(
+                                {
+                                    "Symbol": ticker,
+                                    "Change": change_value,
+                                }
+                            )
+
+                        df = pd.DataFrame(watchlist_data)
+
+                        return render.DataTable(
+                            df,
+                            styles=[
+                                {
+                                    "rows": [
+                                        i
+                                        for i, row in enumerate(watchlist_data)
+                                        if "-" not in row["Change"]
+                                    ],
+                                    "cols": [0, 1],
+                                    "style": {
+                                        "color": "#44bb70",
+                                        "font-weight": "600",
+                                        "background-color": "transparent",
+                                    },
+                                },
+                                {
+                                    "rows": [
+                                        i
+                                        for i, row in enumerate(watchlist_data)
+                                        if "-" in row["Change"]
+                                    ],
+                                    "cols": [0, 1],
+                                    "style": {
+                                        "color": "#d62728",
+                                        "font-weight": "600",
+                                        "background-color": "transparent",
+                                    },
+                                },
+                            ],
+                            filters=False,
+                            selection_mode="none",
+                        )
+
+            with ui.layout_columns(col_widths={"sm": (7, 5)}, row_heights="auto"):
+
+                # 3. Performance Comparison (app2)
                 with ui.card(full_screen=True):
-                    ui.card_header("3. Performance Comparison")
+                    ui.card_header("Relative Performance Comparison")
 
                     @render_plotly
                     def render_performance_comparison():
@@ -737,9 +711,9 @@ with ui.navset_tab(id="main_tabs"):
                         # pass
                         # return go.Figure()
 
-                # 4. S&P 500 Comparison
+                # 4. S&P 500 Comparison (app2)
                 with ui.card(full_screen=True):
-                    ui.card_header("4. S&P 500 Comparison")
+                    ui.card_header("Price Performance vs. S&P 500 Benchmark")
 
                     @render_plotly
                     def render_sp500_comparison():
@@ -806,66 +780,11 @@ with ui.navset_tab(id="main_tabs"):
 
                         return fig
 
-                        # pass
-                        # return go.Figure()
+            with ui.layout_columns(col_widths={"sm": (7, 5)}, row_heights="auto"):
 
-                # 7. Portfolio Treemap
+                # 5. Stock Metrics Table (app2)
                 with ui.card(full_screen=True):
-                    ui.card_header("7. Portfolio Treemap")
-
-                    @render_plotly
-                    def render_portfolio_treemap():
-                        """
-                        7. Portfolio Treemap.
-                        Treemap of portfolio sized by market cap. Selected stock highlighted.
-                        Reacts to: dropdown only. Data: MarketCap from metric.csv.
-                        """
-                        selected_ticker = input.ticker()
-
-                        labels = []
-                        values = []
-                        text_info = []
-                        colors = []
-
-                        for _, row in metric_df.iterrows():
-                            ticker = str(row["Ticker"])
-                            company_name = stocks.get(ticker, ticker)
-                            labels.append(f"{ticker}")
-                            values.append(row["MarketCap"])
-                            text_info.append(f"{company_name}")
-
-                            if ticker == selected_ticker:
-                                colors.append("#2962ff")
-                            else:
-                                colors.append("#787b86")
-
-                        fig = go.Figure(
-                            go.Treemap(
-                                labels=labels,
-                                parents=[""] * len(labels),
-                                values=values,
-                                text=text_info,
-                                textposition="middle center",
-                                marker=dict(colors=colors, line=dict(color="#2a2e39", width=2)),
-                                hovertemplate="<b>%{label}</b><br>%{text}<br>Market Cap: $%{value:,.0f}<extra></extra>",
-                            )
-                        )
-
-                        fig.update_layout(
-                            paper_bgcolor="#131722",
-                            plot_bgcolor="#1e222d",
-                            font=dict(color="#d1d4dc", size=14),
-                            margin=dict(l=10, r=10, t=10, b=10),
-                        )
-
-                        return fig
-
-
-            with ui.layout_columns(col_widths={"sm": (10, 2)}, row_heights="auto"):
-
-                # 5. Stock Metrics Table
-                with ui.card(full_screen=True):
-                    ui.card_header("5. Stock Metrics Table")
+                    ui.card_header("Fundamental Metrics Overview")
 
                     with ui.layout_columns(col_widths=[7, 5]):
                         ui.input_select(
@@ -895,31 +814,50 @@ with ui.navset_tab(id="main_tabs"):
                             df = df.drop(columns=["Unnamed: 0"])
 
                         sort_key = input.metrics_sort_by()
-                        ascending = (input.metrics_sort_dir() == "asc")
+                        ascending = input.metrics_sort_dir() == "asc"
 
                         # Sort BEFORE formatting on numeric values
                         if sort_key in df.columns:
                             df[sort_key] = pd.to_numeric(df[sort_key], errors="coerce")
-                            df = df.sort_values(sort_key, ascending=ascending, na_position="last")
+                            df = df.sort_values(
+                                sort_key, ascending=ascending, na_position="last"
+                            )
 
                         df = df.reset_index(drop=True)
 
                         # Format AFTER sorting
                         if "MarketCap" in df.columns:
-                            mc = pd.to_numeric(df["MarketCap"], errors="coerce") / 1_000_000_000
-                            df["MarketCap"] = mc.map(lambda x: "" if pd.isna(x) else f"{x:,.2f}B")
+                            mc = (
+                                pd.to_numeric(df["MarketCap"], errors="coerce")
+                                / 1_000_000_000
+                            )
+                            df["MarketCap"] = mc.map(
+                                lambda x: "" if pd.isna(x) else f"{x:,.2f}B"
+                            )
 
                         if "P/E Ratio" in df.columns:
                             pe = pd.to_numeric(df["P/E Ratio"], errors="coerce")
-                            df["P/E Ratio"] = pe.map(lambda x: "" if pd.isna(x) else f"{x:.2f}")
+                            df["P/E Ratio"] = pe.map(
+                                lambda x: "" if pd.isna(x) else f"{x:.2f}"
+                            )
 
                         if "DividendYield" in df.columns:
-                            dy = pd.to_numeric(df["DividendYield"], errors="coerce") * 100
-                            df["DividendYield"] = dy.map(lambda x: "" if pd.isna(x) else f"{x:.2f}%")
+                            dy = (
+                                pd.to_numeric(df["DividendYield"], errors="coerce")
+                                * 100
+                            )
+                            df["DividendYield"] = dy.map(
+                                lambda x: "" if pd.isna(x) else f"{x:.2f}%"
+                            )
 
                         if "Revenue Growth" in df.columns:
-                            rg = pd.to_numeric(df["Revenue Growth"], errors="coerce") * 100
-                            df["Revenue Growth"] = rg.map(lambda x: "" if pd.isna(x) else f"{x:.2f}%")
+                            rg = (
+                                pd.to_numeric(df["Revenue Growth"], errors="coerce")
+                                * 100
+                            )
+                            df["Revenue Growth"] = rg.map(
+                                lambda x: "" if pd.isna(x) else f"{x:.2f}%"
+                            )
 
                         return render.DataGrid(
                             df,
@@ -928,77 +866,159 @@ with ui.navset_tab(id="main_tabs"):
                             filters=False,
                             selection_mode="rows",
                         )
-                # 8. Watchlist Display
-                with ui.card():
-                    ui.card_header("8. Watchlist")
-                    ui.input_switch("watchlist_toggle", "Show as $ or %", value=False)
 
-                    @render.data_frame
-                    def render_watchlist():
+                # 6. Risk-Return Scatter Plot (app2: rr_period in card header)
+                with ui.card(full_screen=True):
+                    with ui.card_header():
+                        ui.div(
+                            ui.div("Risk-Return Profile", style="font-weight:700;"),
+                            ui.input_selectize(
+                                "rr_period",
+                                None,
+                                choices=["Full", "1Y", "5Y", "10Y"],
+                                selected="Full",
+                            ),
+                            style="display:flex; justify-content:space-between; align-items:center; width:100%;",
+                        )
+
+                    @render_plotly
+                    def rr_plot():
                         """
-                        8. Watchlist Display.
-                        Table of watchlist stocks (from wishlist.csv) with Symbol, Company,
-                        and Change (colored red/green). Global toggle for percentage vs dollar.
-                        Reacts to: neither dropdown nor date range.
+                        6. Risk-Return Scatter Plot.
+                        Scatter plot of risk (volatility) vs return for all portfolio stocks.
+                        Selected stock highlighted. Reacts to: dropdown only (uses selected date range).
+                        Data: Calculate from close.csv; highlight selected stock.
                         """
-                        current_prices = wishlist_df.iloc[-1]
-                        previous_prices = wishlist_df.iloc[-2]
+                        rr = risk_return_df()
+                        hi = input.ticker()
 
-                        watchlist_data = []
-                        for ticker in wishlist_dict.keys():
-                            current = current_prices[ticker]
-                            previous = previous_prices[ticker]
-                            dollar_change = current - previous
-                            percent_change = (dollar_change / previous) * 100
+                        X_MIN, X_MAX = 0.0, 1.0
+                        Y_MIN, Y_MAX = -0.10, 1.0
 
-                            if input.watchlist_toggle():
-                                change_value = f"{percent_change:+.2f}%"
-                            else:
-                                change_value = f"${dollar_change:+.2f}"
+                        LAYOUT_BASE = dict(
+                            template="plotly_dark",
+                            height=520,
+                            autosize=True,
+                            margin=dict(l=60, r=30, t=20, b=60),
+                            xaxis_title="Annualized Volatility",
+                            yaxis_title="Annualized Return",
+                            xaxis=dict(
+                                range=[X_MIN, X_MAX],
+                                autorange=False,
+                                fixedrange=True,
+                                tickformat=".0%",
+                                tickmode="linear",
+                                tick0=0,
+                                dtick=0.2,
+                            ),
+                            yaxis=dict(
+                                range=[Y_MIN, Y_MAX],
+                                autorange=False,
+                                fixedrange=True,
+                                tickformat=".0%",
+                                tickmode="linear",
+                                tick0=-0.1,
+                                dtick=0.2,
+                            ),
+                        )
 
-                            watchlist_data.append(
-                                {
-                                    "Symbol": ticker,
-                                    "Change": change_value,
-                                }
+                        if rr is None or rr.empty:
+                            fig = go.Figure()
+                            fig.update_layout(
+                                **LAYOUT_BASE,
+                                annotations=[
+                                    dict(
+                                        text="No data in selected range",
+                                        x=0.5,
+                                        y=0.5,
+                                        xref="paper",
+                                        yref="paper",
+                                        showarrow=False,
+                                        font=dict(size=16),
+                                    )
+                                ],
+                            )
+                            return fig
+
+                        rr = rr.copy()
+                        rr["AnnVol"] = pd.to_numeric(rr["AnnVol"], errors="coerce")
+                        rr["AnnReturn"] = pd.to_numeric(rr["AnnReturn"], errors="coerce")
+                        rr = rr.dropna(subset=["Ticker", "AnnVol", "AnnReturn"])
+                        rr["AnnVol"] = rr["AnnVol"].clip(X_MIN, X_MAX)
+                        rr["AnnReturn"] = rr["AnnReturn"].clip(Y_MIN, Y_MAX)
+                        rr = rr.reset_index(drop=True)
+
+                        # Label only the selected stock (app2)
+                        annotations = []
+                        sel_rows = rr[rr["Ticker"] == hi]
+                        if not sel_rows.empty:
+                            i = sel_rows.index[0]
+                            annotations.append(
+                                dict(
+                                    x=rr.at[i, "AnnVol"],
+                                    y=rr.at[i, "AnnReturn"] + 0.035,
+                                    text=rr.at[i, "Ticker"],
+                                    showarrow=False,
+                                    font=dict(size=13, color="white"),
+                                    xanchor="center",
+                                    yanchor="bottom",
+                                )
                             )
 
-                        df = pd.DataFrame(watchlist_data)
+                        others = rr[rr["Ticker"] != hi]
+                        selected = rr[rr["Ticker"] == hi]
 
-                        return render.DataTable(
-                            df,
-                            styles=[
-                                {
-                                    "rows": [
-                                        i
-                                        for i, row in enumerate(watchlist_data)
-                                        if "-" not in row["Change"]
-                                    ],
-                                    "cols": [0, 1],
-                                    "style": {
-                                        "color": "#44bb70",
-                                        "font-weight": "600",
-                                        "background-color": "transparent",
-                                    },
-                                },
-                                {
-                                    "rows": [
-                                        i
-                                        for i, row in enumerate(watchlist_data)
-                                        if "-" in row["Change"]
-                                    ],
-                                    "cols": [0, 1],
-                                    "style": {
-                                        "color": "#d62728",
-                                        "font-weight": "600",
-                                        "background-color": "transparent",
-                                    },
-                                },
-                            ],
-                            filters=False,
-                            selection_mode="none",
-         
+                        fig = go.Figure()
+
+                        fig.add_trace(
+                            go.Scatter(
+                                x=others["AnnVol"],
+                                y=others["AnnReturn"],
+                                mode="markers",
+                                marker=dict(size=12, opacity=0.65, color="#4a9eff"),
+                                hovertemplate="Ticker = %{customdata}<br>Volatility = %{x:.2%}<br>Return = %{y:.2%}<extra></extra>",
+                                customdata=others["Ticker"],
+                                showlegend=False,
+                            )
                         )
+
+                        if not selected.empty:
+                            fig.add_trace(
+                                go.Scatter(
+                                    x=selected["AnnVol"],
+                                    y=selected["AnnReturn"],
+                                    mode="markers",
+                                    marker=dict(
+                                        size=18,
+                                        opacity=1.0,
+                                        line=dict(width=2, color="white"),
+                                        color="#ff6b35",
+                                    ),
+                                    hovertemplate="Ticker = %{customdata}<br>Volatility = %{x:.2%}<br>Return = %{y:.2%}<extra></extra>",
+                                    customdata=selected["Ticker"],
+                                    showlegend=False,
+                                )
+                            )
+
+                        fig.update_xaxes(range=[X_MIN, X_MAX], autorange=False)
+                        fig.update_yaxes(range=[Y_MIN, Y_MAX], autorange=False)
+                        fig.update_layout(
+                            template="plotly_dark",
+                            yaxis_title="Annualized Return",
+                            xaxis_title="Annualized Volatility",
+                            margin=dict(l=10, r=10, t=10, b=10),
+                            annotations=annotations,
+                            xaxis=dict(
+                                title_font=dict(size=18),
+                                tickfont=dict(size=15),
+                            ),
+                            yaxis=dict(
+                                title_font=dict(size=18),
+                                tickfont=dict(size=15),
+                            ),
+                        )
+                        return fig
+
     with ui.nav_panel("Chat"):
         ui.markdown(
             """
@@ -1013,30 +1033,31 @@ with ui.navset_tab(id="main_tabs"):
             """
         )
 
-        
         qc_data = close_df.copy()
 
-        
         qc = QueryChat(
             qc_data,
             "stocks",
             client=clt.ChatAnthropic(model="claude-sonnet-4-0"),
             greeting=(
                 "Hello! I am your Finance Bros assistant. And I am at your service. Let me know how I can help you explore the stock data."
-            )
+            ),
         )
 
-        
         with ui.layout_sidebar():
             with ui.sidebar():
                 ui.tags.div(
-                    {"style": "height: 400px; overflow-y: auto; display: flex; flex-direction: column;"},
-                    qc.ui()
+                    {
+                        "style": "height: 400px; overflow-y: auto; display: flex; flex-direction: column;"
+                    },
+                    qc.ui(),
                 )
                 ui.hr()
                 ui.input_action_button("qc_reset", "Reset", class_="w-100")
                 ui.hr()
-                ui.input_action_button("qc_dl_filtered", "Download filtered CSV", class_="w-100")
+                ui.input_action_button(
+                    "qc_dl_filtered", "Download filtered CSV", class_="w-100"
+                )
 
             with ui.card(full_screen=True):
                 ui.card_header("Filtered table")
@@ -1065,13 +1086,17 @@ with ui.navset_tab(id="main_tabs"):
                             annotations=[
                                 dict(
                                     text="No data available for the current filter.",
-                                    x=0.5, y=0.5, xref="paper", yref="paper",
-                                    showarrow=False, font=dict(color="#d1d4dc", size=14)
+                                    x=0.5,
+                                    y=0.5,
+                                    xref="paper",
+                                    yref="paper",
+                                    showarrow=False,
+                                    font=dict(color="#d1d4dc", size=14),
                                 )
                             ],
                         )
                         return fig
-                    
+
                     df = df.copy()
                     if "Date" not in df.columns or len(df.columns) < 2:
                         fig = go.Figure()
@@ -1083,13 +1108,17 @@ with ui.navset_tab(id="main_tabs"):
                             annotations=[
                                 dict(
                                     text="No stock columns to plot.",
-                                    x=0.5, y=0.5, xref="paper", yref="paper",
-                                    showarrow=False, font=dict(color="#d1d4dc", size=14)
+                                    x=0.5,
+                                    y=0.5,
+                                    xref="paper",
+                                    yref="paper",
+                                    showarrow=False,
+                                    font=dict(color="#d1d4dc", size=14),
                                 )
                             ],
                         )
                         return fig
-                    
+
                     fig = go.Figure()
                     for col in df.columns:
                         if col == "Date":
@@ -1172,7 +1201,7 @@ with ui.navset_tab(id="main_tabs"):
                         )
                         return fig
 
-                    # Use returns for correlation 
+                    # Use returns for correlation
                     tickers = [c for c in df.columns if c != "Date"]
                     prices = df[tickers].apply(pd.to_numeric, errors="coerce")
                     rets = prices.pct_change().dropna(how="all")
@@ -1222,7 +1251,7 @@ with ui.navset_tab(id="main_tabs"):
                         yaxis=dict(autorange="reversed"),
                     )
                     return fig
-                
+
         @reactive.effect
         @reactive.event(input.qc_dl_filtered)
         def _download_csv():
@@ -1232,9 +1261,11 @@ with ui.navset_tab(id="main_tabs"):
             csv_str = df.to_csv(index=False)
             # base64-encode and trigger browser download via JS
             import base64
+
             b64 = base64.b64encode(csv_str.encode()).decode()
             ui.insert_ui(
-                ui.tags.script(f"""
+                ui.tags.script(
+                    f"""
                     (function() {{
                         const a = document.createElement('a');
                         a.href = 'data:text/csv;base64,{b64}';
@@ -1243,7 +1274,8 @@ with ui.navset_tab(id="main_tabs"):
                         a.click();
                         document.body.removeChild(a);
                     }})();
-                """),
+                """
+                ),
                 selector="body",
                 where="beforeEnd",
             )
