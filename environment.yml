@@ -22,6 +22,16 @@ dependencies:
   - matplotlib
   - seaborn
   - numpy
+  - requests
+  - openai
+  - anthropic
+  - duckdb
   - pip:
       - curl_cffi
+      - python-dotenv  
+      - shinychat   
+      - chatlas
+      - inspect-ai     
+      - querychat  
+      
 
