@@ -389,7 +389,7 @@ with ui.navset_tab(id="main_tabs"):
                     selected="AAPL",
                 )
 
-            with ui.layout_columns(col_widths={"sm": (7, 3, 2)}, row_heights="250px"): #"auto"):
+            with ui.layout_columns(col_widths={"sm": (7, 3, 2)}, row_heights="auto"):
 
                 # 1. Stock Price Chart (app2)
                 with ui.card(full_screen=True):
@@ -410,6 +410,7 @@ with ui.navset_tab(id="main_tabs"):
                             fig = go.Figure()
                             fig.update_layout(
                                 template="plotly_dark",
+                                autosize=True,
                                 paper_bgcolor="#131722",
                                 plot_bgcolor="#1e222d",
                                 margin=dict(l=10, r=10, t=10, b=10),
@@ -634,7 +635,7 @@ with ui.navset_tab(id="main_tabs"):
                             selection_mode="none",
                         )
 
-            with ui.layout_columns(col_widths={"sm": (7, 5)}, row_heights="250px"): #"auto"):
+            with ui.layout_columns(col_widths={"sm": (7, 5)}, row_heights="auto"):
 
                 # 3. Performance Comparison (app2)
                 with ui.card(full_screen=True):
@@ -780,7 +781,7 @@ with ui.navset_tab(id="main_tabs"):
 
                         return fig
 
-            with ui.layout_columns(col_widths={"sm": (7, 5)}, row_heights="300px"): #"auto"):
+            with ui.layout_columns(col_widths={"sm": (7, 5)}, row_heights="auto"):
 
                 # 5. Stock Metrics Table (app2)
                 with ui.card(full_screen=True):
