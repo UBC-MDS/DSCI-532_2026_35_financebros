@@ -31,3 +31,6 @@ Thumbs.db
 
 # env
 .env
+.claude/agents/code-improver.md
+CLAUDE.md
+.claude/settings.local.json
