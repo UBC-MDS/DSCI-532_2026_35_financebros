@@ -95,7 +95,7 @@ def dashboard_tab():
             card_portfolio()
             card_watchlist()
 
-        with ui.layout_columns(col_widths={"sm": (7, 5)}, row_heights="auto"):
+        with ui.layout_columns(col_widths={"sm": (6, 6)}, row_heights="auto"):
             card_performance(get_filtered_close)
             card_sp500(get_filtered_close)
 
