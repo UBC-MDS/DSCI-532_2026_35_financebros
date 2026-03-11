@@ -48,3 +48,33 @@ To set up and run the dashboard locally:
    ```
 
 The dashboard will be available at the URL shown in the terminal (typically `http://127.0.0.1:8000`).
+
+## Code Structure
+
+```
+src/
+├── app.py                  # Entry point — registers tabs and holds all global CSS
+├── data_loader.py          # Loads CSV data files and defines DATE_MIN/DATE_MAX constants
+├── stocks.py               # Ticker dictionaries: Magnificent 7 and watchlist stocks
+├── reactives.py            # Shared reactive calculations (date filtering, risk-return metrics)
+├── _input.py               # Runtime proxy for Shiny's input object (session isolation)
+│
+├── tabs/
+│   ├── tab_dashboard.py    # Dashboard tab — top-bar controls and card layout
+│   └── tab_chat.py         # Chat tab — Claude-backed QueryChat with Reset and Download CSV
+│
+└── cards/
+    │   # Dashboard cards (driven by selected ticker + date range)
+    ├── card_portfolio.py       # Market-cap treemap of all 7 stocks
+    ├── card_price_chart.py     # Price history for the selected stock
+    ├── card_performance.py     # Normalized return vs. all other stocks
+    ├── card_sp500.py           # Selected stock vs. S&P 500 (SPY) benchmark
+    ├── card_risk_return.py     # Risk-return scatter (annualized volatility vs. return)
+    ├── card_metrics.py         # Sortable fundamentals table (P/E, market cap, etc.)
+    ├── card_watchlist.py       # Watchlist table with color-coded price changes
+    │
+    │   # Chat cards (driven by QueryChat SQL filter)
+    ├── card_chat_table.py          # Filtered data table with dynamic SQL-generated title
+    ├── card_chat_price_series.py   # Multi-line price chart of filtered data
+    └── card_chat_heatmap.py        # Correlation heatmap of daily returns
+```
