@@ -67,11 +67,11 @@ h2, .h2 {
 }
 
 .portfolio-card {
-  height: 35vh !important;
+  height: 30vh !important;
 }
 
 .portfolio-card .card-body {
-  height: calc(35vh - 40px) !important;
+  height: calc(30vh - 40px) !important;
 }
 
 /* Shiny data grid styling */
