@@ -14,7 +14,7 @@ The financebros dashboard is a web application that tracks key financial metrics
 <details open>
 <summary>Click to close app demo</summary>
 
-![Dashboard Demo](img/demo_m7_resized.gif)
+![Dashboard Demo](img/demo.gif)
 
 </details>
 
