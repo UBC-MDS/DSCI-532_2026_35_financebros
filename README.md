@@ -95,6 +95,14 @@ To set up and run the dashboard locally:
    shiny run src/app.py
    ```
 
+## Tests
+
+Run all tests with one command:
+
+   ```bash
+   python -m pytest -v --browser firefox  
+   ```
+
 The dashboard will be available at the URL shown in the terminal (typically `http://127.0.0.1:8000`).
 
 ## Code Structure

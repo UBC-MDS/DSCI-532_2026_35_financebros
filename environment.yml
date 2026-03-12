@@ -26,6 +26,8 @@ dependencies:
   - openai
   - anthropic
   - duckdb
+  - pytest-playwright
+  - pytest
   - pip:
       - curl_cffi
       - python-dotenv  
