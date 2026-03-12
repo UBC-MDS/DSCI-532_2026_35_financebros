@@ -23,12 +23,13 @@ def dashboard_tab():
 
     # ── Shared reactive source of truth for selected ticker ──────────────────
     selected_ticker = reactive.Value("AAPL")
+    _ticker_source = reactive.Value("dropdown")  # tracks what triggered last change
 
     @reactive.effect
     def _sync_dropdown_to_ticker():
-        """Dropdown → selected_ticker (only when value actually differs)"""
+        """Dropdown → selected_ticker, but only if dropdown was the source"""
         new_val = input.ticker()
-        if new_val != selected_ticker():
+        if _ticker_source() == "dropdown" and new_val != selected_ticker():
             selected_ticker.set(new_val)
 
     # ── Shared filtered data ─────────────────────────────────────────────────
@@ -38,7 +39,7 @@ def dashboard_tab():
         mask = (close_df["Date"] >= pd.Timestamp(dates[0])) & (
             close_df["Date"] <= pd.Timestamp(dates[1])
         )
-        return close_df.loc[mask].copy()
+        return close_df.loc[mask]  # ← remove .copy(), saves time on large df
 
     @reactive.calc
     def analysis_close():
@@ -59,6 +60,11 @@ def dashboard_tab():
         years = {"1Y": 1, "5Y": 5, "10Y": 10}[period]
         cutoff = df["Date"].max() - pd.DateOffset(years=years)
         return df[df["Date"] >= cutoff].copy()
+
+    @reactive.calc
+    def get_normalized_close():
+        df = get_filtered_close().set_index("Date")
+        return df / df.iloc[0] * 100  # ← computed once, cached
 
     @reactive.calc
     def risk_return_df():
@@ -102,11 +108,11 @@ def dashboard_tab():
 
         with ui.layout_columns(col_widths={"sm": (7, 3, 2)}, row_heights="auto"):
             card_price_chart(get_filtered_close, selected_ticker)
-            card_portfolio(selected_ticker)
+            card_portfolio(selected_ticker, _ticker_source)
             card_watchlist()
 
         with ui.layout_columns(col_widths={"sm": (6, 6)}, row_heights="auto"):
-            card_performance(get_filtered_close, selected_ticker)
+            card_performance(get_filtered_close, get_normalized_close, selected_ticker)
             card_sp500(get_filtered_close, selected_ticker)
 
         with ui.layout_columns(col_widths={"sm": (7, 5)}, row_heights="auto"):
