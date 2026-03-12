@@ -2,27 +2,22 @@ import plotly.graph_objects as go
 from shiny.express import expressify, ui
 from shinywidgets import render_plotly
 
-from _input import input
-
 
 @expressify
-def card_performance(get_filtered_close):
+def card_performance(get_filtered_close, get_normalized_close, selected_ticker):
     with ui.card(full_screen=True):
         ui.card_header("Relative Performance Comparison")
 
         @render_plotly
         def render_performance_comparison():
-            df = get_filtered_close().copy()
-            ticker = input.ticker()
+            ticker = selected_ticker()
+            normalized = get_normalized_close()  # ← cached, not recomputed
+            raw_prices = get_filtered_close().set_index("Date")
 
-            if df.empty:
+            if normalized.empty:
                 return go.Figure()
 
-            df = df.set_index("Date")
-            raw_prices = df.copy()
-            normalized = df / df.iloc[0] * 100
             fig = go.Figure()
-
             for col in normalized.columns:
                 fig.add_trace(
                     go.Scatter(
@@ -41,7 +36,6 @@ def card_performance(get_filtered_close):
                         ),
                     )
                 )
-
             fig.update_layout(
                 template="plotly_dark",
                 yaxis_title="Normalized Performance (Base = 100)",

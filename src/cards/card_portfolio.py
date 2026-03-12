@@ -1,19 +1,20 @@
 import plotly.graph_objects as go
+from shiny import reactive
 from shiny.express import expressify, ui
-from shinywidgets import render_plotly
+from shinywidgets import render_plotly, reactive_read
 
 from _input import input
 from data_loader import close_df, metric_df
 
 
 @expressify
-def card_portfolio():
+def card_portfolio(selected_ticker):
     with ui.card(class_="portfolio-card"):
         ui.card_header("Portfolio Overview")
 
         @render_plotly
         def render_current_price():
-            selected_ticker = input.ticker()
+            ticker = selected_ticker()
             cur = close_df.iloc[-1]
             prev = close_df.iloc[-2]
 
@@ -25,12 +26,12 @@ def card_portfolio():
             labels, values, text_info, colors, customdata_list = [], [], [], [], []
 
             for _, row in metric_df.iterrows():
-                ticker = str(row["Ticker"])
-                if ticker not in close_df.columns:
+                t = str(row["Ticker"])
+                if t not in close_df.columns:
                     continue
                 market_cap = row["MarketCap"]
-                current = float(cur[ticker])
-                previous = float(prev[ticker])
+                current = float(cur[t])
+                previous = float(prev[t])
                 pct = 0.0 if previous == 0 else (current / previous - 1.0) * 100
 
                 if pct > 0.05:
@@ -40,7 +41,7 @@ def card_portfolio():
                 else:
                     base_color, arrow = GRAY, "•"
 
-                if ticker == selected_ticker:
+                if t == ticker:
                     colors.append(base_color)
                 else:
                     r, g, b = (
@@ -50,12 +51,12 @@ def card_portfolio():
                     )
                     colors.append(f"rgba({r},{g},{b},{DIM_OPACITY})")
 
-                labels.append(ticker)
+                labels.append(t)
                 values.append(market_cap)
                 text_info.append(f"${current:,.2f} {arrow}{pct:.2f}%")
                 customdata_list.append([current, pct])
 
-            fig = go.Figure(
+            fig = go.FigureWidget(  # ← FigureWidget instead of Figure
                 go.Treemap(
                     labels=labels,
                     parents=[""] * len(labels),
@@ -73,4 +74,15 @@ def card_portfolio():
                 font=dict(color="#d1d4dc", size=16),
                 margin=dict(l=10, r=10, t=10, b=10),
             )
+
+            # ── Register click handler directly on the FigureWidget ──────────
+            def _handle_click(trace, points, state):
+                if points.point_inds:
+                    clicked = labels[points.point_inds[0]]
+                    selected_ticker.set(clicked)
+                    ui.update_selectize("ticker", selected=clicked)
+
+            fig.data[0].on_click(_handle_click)
             return fig
+
+        # ── No longer need the reactive.effect — handler is on the widget ────
