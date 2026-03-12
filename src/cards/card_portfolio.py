@@ -8,7 +8,7 @@ from data_loader import close_df, metric_df
 
 
 @expressify
-def card_portfolio(selected_ticker, _ticker_source):
+def card_portfolio(selected_ticker):
     with ui.card(class_="portfolio-card"):
         ui.card_header("Portfolio Overview")
 
@@ -79,7 +79,8 @@ def card_portfolio(selected_ticker, _ticker_source):
             def _handle_click(trace, points, state):
                 if points.point_inds:
                     clicked = labels[points.point_inds[0]]
-                    selected_ticker.set(clicked)  # ← only this, no update_selectize
+                    selected_ticker.set(clicked)
+                    ui.update_selectize("ticker", selected=clicked)
 
             fig.data[0].on_click(_handle_click)
             return fig

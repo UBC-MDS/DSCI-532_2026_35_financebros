@@ -25,18 +25,13 @@ def dashboard_tab():
     selected_ticker = reactive.Value("AAPL")
 
     @reactive.effect
-    def _dropdown_to_ticker():
-        """Dropdown → selected_ticker"""
+    def _sync():
+        """Always keep selected_ticker in sync with whichever changed last"""
         new_val = input.ticker()
-        if new_val != selected_ticker():
+        with reactive.isolate():
+            current = selected_ticker()
+        if new_val != current:
             selected_ticker.set(new_val)
-
-    @reactive.effect
-    def _ticker_to_dropdown():
-        """selected_ticker → dropdown (treemap click path)"""
-        new_val = selected_ticker()
-        if new_val != input.ticker():
-            ui.update_selectize("ticker", selected=new_val)
 
     # ── Shared filtered data ─────────────────────────────────────────────────
     @reactive.calc
