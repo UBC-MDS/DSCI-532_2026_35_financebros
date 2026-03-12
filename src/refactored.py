@@ -4,8 +4,7 @@ import pandas as pd
 
 def compute_risk_return(df: pd.DataFrame, period: str, tickers: list[str]) -> pd.DataFrame:
     """
-    Compute annualized return and volatility for each ticker over the given period.
-    Pure function: no reactive inputs, no globals.
+    Compute annualized return and volatility for each ticker over the given period, pure func
     """
     if df.empty:
         return pd.DataFrame(columns=["Ticker", "AnnReturn", "AnnVol"])
