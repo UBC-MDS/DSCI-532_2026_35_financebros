@@ -79,10 +79,7 @@ def card_portfolio(selected_ticker, _ticker_source):
             def _handle_click(trace, points, state):
                 if points.point_inds:
                     clicked = labels[points.point_inds[0]]
-                    _ticker_source.set("treemap")   # ← mark source as treemap
-                    selected_ticker.set(clicked)
-                    ui.update_selectize("ticker", selected=clicked)
-                    _ticker_source.set("dropdown")  # ← reset so dropdown works again
+                    selected_ticker.set(clicked)  # ← only this, no update_selectize
 
             fig.data[0].on_click(_handle_click)
             return fig

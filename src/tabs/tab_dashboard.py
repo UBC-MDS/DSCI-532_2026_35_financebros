@@ -23,14 +23,20 @@ def dashboard_tab():
 
     # ── Shared reactive source of truth for selected ticker ──────────────────
     selected_ticker = reactive.Value("AAPL")
-    _ticker_source = reactive.Value("dropdown")  # tracks what triggered last change
 
     @reactive.effect
-    def _sync_dropdown_to_ticker():
-        """Dropdown → selected_ticker, but only if dropdown was the source"""
+    def _dropdown_to_ticker():
+        """Dropdown → selected_ticker"""
         new_val = input.ticker()
-        if _ticker_source() == "dropdown" and new_val != selected_ticker():
+        if new_val != selected_ticker():
             selected_ticker.set(new_val)
+
+    @reactive.effect
+    def _ticker_to_dropdown():
+        """selected_ticker → dropdown (treemap click path)"""
+        new_val = selected_ticker()
+        if new_val != input.ticker():
+            ui.update_selectize("ticker", selected=new_val)
 
     # ── Shared filtered data ─────────────────────────────────────────────────
     @reactive.calc
@@ -108,7 +114,7 @@ def dashboard_tab():
 
         with ui.layout_columns(col_widths={"sm": (7, 3, 2)}, row_heights="auto"):
             card_price_chart(get_filtered_close, selected_ticker)
-            card_portfolio(selected_ticker, _ticker_source)
+            card_portfolio(selected_ticker)
             card_watchlist()
 
         with ui.layout_columns(col_widths={"sm": (6, 6)}, row_heights="auto"):
