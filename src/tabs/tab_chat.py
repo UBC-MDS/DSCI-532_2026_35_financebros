@@ -29,7 +29,7 @@ def chat_tab():
     with ui.nav_panel("Chat"):
         ui.markdown(
             """
-            ## Finance Bros Chat
+            ## The Magnificent Analyst
 
             Ask questions like:
             - "Show only dates after 2021"
@@ -47,7 +47,7 @@ def chat_tab():
             "stocks",
             client=clt.ChatAnthropic(model="claude-3-haiku-20240307"),
             greeting=(
-                "Hello! I am your Finance Bros assistant. And I am at your service. Let me know how I can help you explore the stock data."
+                "Hello! I am the Magnificent Analyst, your guide to the Magnificent 7 stock data. Let me know how I can help you explore it!"
             ),
         )
 
