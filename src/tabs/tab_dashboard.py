@@ -20,8 +20,18 @@ RR_TICKERS = [c for c in close_df.columns if c != "Date"]
 
 @expressify
 def dashboard_tab():
-    # Reactive calcs are defined per-session (inside this function) so they
-    # capture the real session, not the stub session at import time.
+
+    # ── Shared reactive source of truth for selected ticker ──────────────────
+    selected_ticker = reactive.Value("AAPL")
+
+    @reactive.effect
+    def _sync_dropdown_to_ticker():
+        """Dropdown → selected_ticker (only when value actually differs)"""
+        new_val = input.ticker()
+        if new_val != selected_ticker():
+            selected_ticker.set(new_val)
+
+    # ── Shared filtered data ─────────────────────────────────────────────────
     @reactive.calc
     def get_filtered_close():
         dates = input.dates()
@@ -91,14 +101,14 @@ def dashboard_tab():
             ui.div()  # spacer
 
         with ui.layout_columns(col_widths={"sm": (7, 3, 2)}, row_heights="auto"):
-            card_price_chart(get_filtered_close)
-            card_portfolio()
+            card_price_chart(get_filtered_close, selected_ticker)
+            card_portfolio(selected_ticker)
             card_watchlist()
 
         with ui.layout_columns(col_widths={"sm": (6, 6)}, row_heights="auto"):
-            card_performance(get_filtered_close)
-            card_sp500(get_filtered_close)
+            card_performance(get_filtered_close, selected_ticker)
+            card_sp500(get_filtered_close, selected_ticker)
 
         with ui.layout_columns(col_widths={"sm": (7, 5)}, row_heights="auto"):
             card_metrics()
-            card_risk_return(risk_return_df)
+            card_risk_return(risk_return_df, selected_ticker)

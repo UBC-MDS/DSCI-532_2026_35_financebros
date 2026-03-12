@@ -2,18 +2,16 @@ import plotly.graph_objects as go
 from shiny.express import expressify, ui
 from shinywidgets import render_plotly
 
-from _input import input
-
 
 @expressify
-def card_performance(get_filtered_close):
+def card_performance(get_filtered_close, selected_ticker):  # ← add selected_ticker
     with ui.card(full_screen=True):
         ui.card_header("Relative Performance Comparison")
 
         @render_plotly
         def render_performance_comparison():
             df = get_filtered_close().copy()
-            ticker = input.ticker()
+            ticker = selected_ticker()  # ← was input.ticker()
 
             if df.empty:
                 return go.Figure()

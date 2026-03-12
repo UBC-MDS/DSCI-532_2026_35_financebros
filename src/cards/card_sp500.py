@@ -8,13 +8,13 @@ from data_loader import spy_df
 
 
 @expressify
-def card_sp500(get_filtered_close):
+def card_sp500(get_filtered_close, selected_ticker):  # ← add selected_ticker
     with ui.card(full_screen=True):
         ui.card_header("Price Performance vs. S&P 500 Benchmark")
 
         @render_plotly
         def render_sp500_comparison():
-            ticker = input.ticker()
+            ticker = selected_ticker()  # ← was input.ticker()
             stock_df = get_filtered_close().copy()
             dates = input.dates()
 
