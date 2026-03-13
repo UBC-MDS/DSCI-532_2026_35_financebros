@@ -7,6 +7,79 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Latest Release
 
+## [0.4.0] - 2026-03-12
+
+### Added
+
+- <!-- New features, components, tests - one line each. Reference PRs where relevant (e.g. #12). -->
+
+### Changed
+
+- <!-- Spec or design deviations, and motivation. -->
+- <!-- Feedback items you addressed: "Addressed: <item description> (#<prioritization issue>) via #<PR>" -->
+
+### Fixed
+
+- <!-- Bugs resolved since M3. -->
+
+- **Feedback prioritization issue link:** #...
+
+### Known Issues
+
+- <!-- Anything incomplete or broken TAs should be aware of (so it isn't mistaken for unfinished work). -->
+
+### Release Highlight: [Name of your advanced feature]
+
+<!-- One short paragraph describing what you built and what it does for the user. -->
+
+- **Option chosen:** A / B / C / D
+- **PR:** #...
+- **Why this option over the others:** <!-- 1–2 sentences; link to your feature prioritization issue -->
+- **Feature prioritization issue link:** #...
+
+### Collaboration
+
+<!-- Summary of workflow or collaboration improvements made since M3. -->
+
+- **CONTRIBUTING.md:** <!-- Link to the PR that updated it with your M3 retrospective and M4 norms. -->
+- **M3 retrospective:** <!-- What changed in your workflow after M3 collaboration feedback. -->
+- **M4:** <!-- What you tried or improved this milestone. -->
+
+### Reflection
+- *Pytest unit test*: test_compute_risk_return_basic. It checks the function in refactored.py, compute_risk_return. This test validates the core math in compute_risk_return, the annualization of daily returns and volatility. The logic is nearly identical, it ensures that it sets the Date index, optionally filter by cutoff, compute pct_change, and annualize mean and std by 252, it just has the reactive dependencies removed
+    - If the annualization multiplier changes from 252 (trading days) to 365 (calendar days), both assertions fail
+    - If pct_change() is replaced with log returns, the mean shifts slightly and the AnnReturn assertion fails
+    - If dropna(how="all") changes to dropna(how="any"), rows with partial data get dropped, potentially breaking the row count assumption
+    - If rets.std() switches from sample std (ddof=1, pandas default) to population std (ddof=0), the volatility for non-uniform data would differ — though this specific test wouldn't catch it since std of identical values is 0 either way
+    - If .dropna() on the output DataFrame drops rows differently, out.iloc[0] could raise an IndexError
+- *refactorization*: compute_risk_return in refactored.py is a refactoring of the risk_return_df in the reactives.py file. The refactored code is a pure function and does what risk_return_df does (in reactives.py) the pytest unit test is test_compute_risk_return_basic in unit_test.py
+- *Playwright Test 1*: test_watchlist_change_matches_data. It covers: loading the app, computes the expected dollar change for the first watchlist ticker from the raw data (current - previous), then asserts that the rendered DataGrid cell at row 0, col 1 shows that value formatted as $+X.XX. 
+- What breaks if behavior changes: 
+    - If the watchlist table column order changes (e.g. change column moves from index 1), the cell lookup hits the wrong column
+    - If the dollar formatting changes (e.g. drops the + sign for positive values, or uses different decimal places), the string comparison fails
+    - If watchlist_df row ordering changes (e.g. sorted differently), iloc[-1] and iloc[-2] no longer represent the two most recent dates
+    - If the default toggle state starts as True (percent mode), the cell won't match the dollar format and the test fails 
+- *Playwright Test 2*: test_rr_period_choices_exist. It covers: Navigates to the app and asserts the rr_period selectize input shows exactly these four choices in this order: ["Full", "1Y", "5Y", "10Y"]. 
+- What breaks if behavior changes:
+    - Adding, removing, or renaming any period option (e.g. adding "3Y", renaming "Full" to "All") causes the assertion to fail
+    - Reordering the choices list fails the assertion since expect_choices checks order
+    - If the input widget ID is renamed from "rr_period", Playwright can't locate the element
+- *Playwright Test 3*: test_watchlist_toggle_changes_format. it covers: sets the watchlist_toggle switch to True and asserts that the first data cell in col 1 now matches a regex ending in %, confirming the display switched from dollar to percent formatting
+- What breaks if behavior changes:
+    - If toggling to True no longer switches to percent mode, the cell won't end in % and the regex fails
+    - If the percent format changes to something that doesn't end in % (e.g. "10 pct"), the regex fails
+    - If the table re-renders with a different row order after toggle, row 0 col 1 may not be the cell being reformatted
+
+<!-- Standard (see General Guidelines): what the dashboard does well, current limitations,
+     any intentional deviations from DSCI 531 visualization best practices. -->
+
+<!-- Trade-offs: one sentence on feedback prioritization - full rationale is in #<issue> and ### Changed above. -->
+
+<!-- Most useful: which lecture, material, or feedback shaped your work most this milestone,
+     and anything you wish had been covered. -->
+
+
+
 ## [0.3.0]
 
 ### Added
