@@ -13,10 +13,6 @@ import re
 app = create_app_fixture("app.py")
 
 
-def _format_date(d):
-    return pd.to_datetime(d).strftime("%Y-%m-%d")
-
-
 def test_watchlist_change_matches_data(page: Page, app: ShinyAppProc):
     """Verifies watchlist dollar changes match the underlying data so daily changes are accurate"""
     page.goto(app.url)
