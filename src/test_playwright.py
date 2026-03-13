@@ -5,7 +5,7 @@ from shiny.pytest import create_app_fixture
 
 import pandas as pd
 
-from data_loader import DATE_MIN, watchlist_df
+from data_loader import watchlist_df
 from stocks import watchlist as watchlist_dict
 
 import re
