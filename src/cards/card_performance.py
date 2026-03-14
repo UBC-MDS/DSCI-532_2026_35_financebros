@@ -39,6 +39,8 @@ def card_performance(get_filtered_close, get_normalized_close, selected_ticker):
             fig.update_layout(
                 template="plotly_dark",
                 yaxis_title="Normalized Performance (Base = 100)",
+                yaxis_type="log",                          #log scale
+                yaxis_tickformat=".0f",                    
                 xaxis_title="Date",
                 showlegend=True,
                 margin=dict(l=10, r=10, t=10, b=10),
