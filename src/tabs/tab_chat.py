@@ -11,7 +11,7 @@ from cards.card_chat_table import card_chat_table
 from cards.card_chat_price_series import card_chat_price_series
 from cards.card_chat_heatmap import card_chat_heatmap
 
-from data_loader import close_df
+from data_loader import close_tbl
 
 
 class _InputProxy:
@@ -40,10 +40,8 @@ def chat_tab():
             """
         )
 
-        qc_data = close_df.copy()
-
         qc = QueryChat(
-            qc_data,
+            close_tbl,
             "stocks",
             client=clt.ChatAnthropic(model="claude-3-haiku-20240307"),
             greeting=(
@@ -73,7 +71,8 @@ def chat_tab():
         @reactive.effect
         @reactive.event(input.qc_dl_filtered)
         def _download_csv():
-            df = qc.df()
+            _raw = qc.df()
+            df = _raw.execute() if hasattr(_raw, "execute") else _raw
             if df is None:
                 df = pd.DataFrame()
             csv_str = df.to_csv(index=False)

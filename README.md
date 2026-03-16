@@ -99,7 +99,7 @@ The dashboard will be available at the URL shown in the terminal (typically `htt
 ```
 src/
 ├── app.py                  # Entry point — registers tabs and holds all global CSS
-├── data_loader.py          # Loads CSV data files and defines DATE_MIN/DATE_MAX constants
+├── data_loader.py          # ibis+DuckDB parquet backend; exports pandas DataFrames, ibis table exprs, and DATE_MIN/DATE_MAX
 ├── stocks.py               # Ticker dictionaries: Magnificent 7 and watchlist stocks
 ├── reactives.py            # Shared reactive calculations (date filtering, risk-return metrics)
 ├── _input.py               # Runtime proxy for Shiny's input object (session isolation)
