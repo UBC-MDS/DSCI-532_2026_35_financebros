@@ -4,7 +4,7 @@ import shiny.express as _se
 from shiny import reactive
 from shiny.express import expressify, ui
 
-from data_loader import close_df, DATE_MIN, DATE_MAX
+from data_loader import close_df, close_tbl, DATE_MIN, DATE_MAX
 from stocks import stocks
 from _input import input
 from cards.card_price_chart import card_price_chart
@@ -36,22 +36,21 @@ def dashboard_tab():
     # ── Shared filtered data ─────────────────────────────────────────────────
     @reactive.calc
     def get_filtered_close():
-        dates = input.dates()
-        mask = (close_df["Date"] >= pd.Timestamp(dates[0])) & (
-            close_df["Date"] <= pd.Timestamp(dates[1])
+        start, end = input.dates()
+        return (
+            close_tbl
+            .filter((close_tbl.Date >= start) & (close_tbl.Date <= end))
+            .to_pandas()
         )
-        return close_df.loc[mask]  # ← remove .copy(), saves time on large df
 
     @reactive.calc
     def analysis_close():
         d0, d1 = input.dates()
         df = (
-            close_df[
-                (close_df["Date"] >= pd.Timestamp(d0))
-                & (close_df["Date"] <= pd.Timestamp(d1))
-            ]
-            .copy()
-            .sort_values("Date")
+            close_tbl
+            .filter((close_tbl.Date >= d0) & (close_tbl.Date <= d1))
+            .order_by("Date")
+            .to_pandas()
         )
         if df.empty:
             return df

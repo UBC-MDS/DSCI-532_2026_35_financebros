@@ -10,7 +10,8 @@ def card_chat_price_series(qc):
 
         @render_plotly
         def qc_line_chart():
-            df = qc.df()
+            _raw = qc.df()
+            df = _raw.execute() if hasattr(_raw, "execute") else _raw
             if df is None or df.empty:
                 fig = go.Figure()
                 fig.update_layout(
