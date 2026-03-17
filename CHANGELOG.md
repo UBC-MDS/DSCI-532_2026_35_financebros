@@ -11,22 +11,31 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- <!-- New features, components, tests - one line each. Reference PRs where relevant (e.g. #12). -->
+- Added reactive stock selection shared across components: clicking the Portfolio treemap updates the selected ticker (and syncs with the dropdown) and updates dependent charts. (PR #85)
+- Added automated testing: 1 unit test, refactored logic into at least one testable function, and 3 Playwright tests; documented a single command to run tests in the README. (PR #90)
+
 
 ### Changed
 
-- <!-- Spec or design deviations, and motivation. -->
-- <!-- Feedback items you addressed: "Addressed: <item description> (#<prioritization issue>) via #<PR>" -->
+- Major refactor: split the monolithic `app.py` into modular dashboard/chat components and introduced a runtime input proxy for safer session isolation. (PR #76)
+- Improved documentation and end-user guidance in `README.md`, including peer-review driven updates and additional prompts. (PRs #83, #91, #93)
+- Switched the QueryChat model configuration and adjusted sidebar sizing for improved usability. (PR #72)
+- Updated dashboard visuals and layout:
+  - Performance card y-axis changed to log scale and mermaid/diagram updates. (PRs #91, #93)
+  - General UI naming consistency (“Magnificent 7 Tracker”), plus multiple UI/UX tweaks. (PR #85)
+
 
 ### Fixed
 
-- <!-- Bugs resolved since M3. -->
+- Fixed metrics table sorting for numeric fields (e.g., Market Cap, Dividend Yield) by sorting on raw numeric values prior to formatting. (PR #85)
 
 - **Feedback prioritization issue link:** #...
 
-### Known Issues
-
-- <!-- Anything incomplete or broken TAs should be aware of (so it isn't mistaken for unfinished work). -->
+### Data / Backend
+- Replaced the CSV backend with an ibis + DuckDB parquet workflow:
+  - Added parquet data files and an ETL notebook to generate them.
+  - Updated data loader to expose ibis table expressions and materialized pandas DataFrames.
+  - Updated dashboard components to execute lazy ibis results where needed. (PR #94)
 
 ### Release Highlight: [Name of your advanced feature]
 
@@ -70,13 +79,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     - If the percent format changes to something that doesn't end in % (e.g. "10 pct"), the regex fails
     - If the table re-renders with a different row order after toggle, row 0 col 1 may not be the cell being reformatted
 
-<!-- Standard (see General Guidelines): what the dashboard does well, current limitations,
-     any intentional deviations from DSCI 531 visualization best practices. -->
-
-<!-- Trade-offs: one sentence on feedback prioritization - full rationale is in #<issue> and ### Changed above. -->
-
-<!-- Most useful: which lecture, material, or feedback shaped your work most this milestone,
-     and anything you wish had been covered. -->
 
 
 
