@@ -26,6 +26,9 @@ dependencies:
   - openai
   - anthropic
   - duckdb
+  - pytest-playwright
+  - pytest
+  - duckdb
   - pip:
       - curl_cffi
       - python-dotenv  
@@ -33,5 +36,6 @@ dependencies:
       - chatlas
       - inspect-ai     
       - querychat  
+      - ibis-framework[duckdb]
       
 

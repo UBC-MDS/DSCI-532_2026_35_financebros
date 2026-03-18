@@ -15,9 +15,9 @@ def card_metrics():
                 "metrics_sort_by",
                 "Sort by",
                 choices={
-                    "Market Cap": "MarketCap",
+                    "MarketCap": "Market Cap",
                     "P/E Ratio": "P/E Ratio",
-                    "Dividend Yield": "DividendYield",
+                    "DividendYield": "Dividend Yield",
                     "Revenue Growth": "Revenue Growth",
                 },
                 selected="MarketCap",
@@ -39,12 +39,15 @@ def card_metrics():
             sort_key = input.metrics_sort_by()
             ascending = input.metrics_sort_dir() == "asc"
 
+            # ── Sort on raw numeric values BEFORE any formatting ─────────────
             if sort_key in df.columns:
-                df[sort_key] = pd.to_numeric(df[sort_key], errors="coerce")
-                df = df.sort_values(sort_key, ascending=ascending, na_position="last")
+                df["_sort"] = pd.to_numeric(df[sort_key], errors="coerce")
+                df = df.sort_values("_sort", ascending=ascending, na_position="last")
+                df = df.drop(columns=["_sort"])
 
             df = df.reset_index(drop=True)
 
+            # ── Format AFTER sorting ─────────────────────────────────────────
             if "MarketCap" in df.columns:
                 mc = pd.to_numeric(df["MarketCap"], errors="coerce") / 1_000_000_000
                 df["MarketCap"] = mc.map(lambda x: "" if pd.isna(x) else f"{x:,.2f}B")

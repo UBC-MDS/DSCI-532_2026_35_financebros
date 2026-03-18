@@ -4,7 +4,7 @@ import shiny.express as _se
 from shiny import reactive
 from shiny.express import expressify, ui
 
-from data_loader import close_df, DATE_MIN, DATE_MAX
+from data_loader import close_df, close_tbl, DATE_MIN, DATE_MAX
 from stocks import stocks
 from _input import input
 from cards.card_price_chart import card_price_chart
@@ -20,26 +20,37 @@ RR_TICKERS = [c for c in close_df.columns if c != "Date"]
 
 @expressify
 def dashboard_tab():
-    # Reactive calcs are defined per-session (inside this function) so they
-    # capture the real session, not the stub session at import time.
+
+    # ── Shared reactive source of truth for selected ticker ──────────────────
+    selected_ticker = reactive.Value("AAPL")
+
+    @reactive.effect
+    def _sync():
+        """Always keep selected_ticker in sync with whichever changed last"""
+        new_val = input.ticker()
+        with reactive.isolate():
+            current = selected_ticker()
+        if new_val != current:
+            selected_ticker.set(new_val)
+
+    # ── Shared filtered data ─────────────────────────────────────────────────
     @reactive.calc
     def get_filtered_close():
-        dates = input.dates()
-        mask = (close_df["Date"] >= pd.Timestamp(dates[0])) & (
-            close_df["Date"] <= pd.Timestamp(dates[1])
+        start, end = input.dates()
+        return (
+            close_tbl
+            .filter((close_tbl.Date >= start) & (close_tbl.Date <= end))
+            .to_pandas()
         )
-        return close_df.loc[mask].copy()
 
     @reactive.calc
     def analysis_close():
         d0, d1 = input.dates()
         df = (
-            close_df[
-                (close_df["Date"] >= pd.Timestamp(d0))
-                & (close_df["Date"] <= pd.Timestamp(d1))
-            ]
-            .copy()
-            .sort_values("Date")
+            close_tbl
+            .filter((close_tbl.Date >= d0) & (close_tbl.Date <= d1))
+            .order_by("Date")
+            .to_pandas()
         )
         if df.empty:
             return df
@@ -49,6 +60,11 @@ def dashboard_tab():
         years = {"1Y": 1, "5Y": 5, "10Y": 10}[period]
         cutoff = df["Date"].max() - pd.DateOffset(years=years)
         return df[df["Date"] >= cutoff].copy()
+
+    @reactive.calc
+    def get_normalized_close():
+        df = get_filtered_close().set_index("Date")
+        return df / df.iloc[0] * 100  # ← computed once, cached
 
     @reactive.calc
     def risk_return_df():
@@ -91,14 +107,14 @@ def dashboard_tab():
             ui.div()  # spacer
 
         with ui.layout_columns(col_widths={"sm": (7, 3, 2)}, row_heights="auto"):
-            card_price_chart(get_filtered_close)
-            card_portfolio()
+            card_price_chart(get_filtered_close, selected_ticker)
+            card_portfolio(selected_ticker)
             card_watchlist()
 
         with ui.layout_columns(col_widths={"sm": (6, 6)}, row_heights="auto"):
-            card_performance(get_filtered_close)
-            card_sp500(get_filtered_close)
+            card_performance(get_filtered_close, get_normalized_close, selected_ticker)
+            card_sp500(get_filtered_close, selected_ticker)
 
         with ui.layout_columns(col_widths={"sm": (7, 5)}, row_heights="auto"):
             card_metrics()
-            card_risk_return(risk_return_df)
+            card_risk_return(risk_return_df, selected_ticker)

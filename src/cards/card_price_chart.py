@@ -3,18 +3,17 @@ import plotly.graph_objects as go
 from shiny.express import expressify, ui
 from shinywidgets import render_plotly
 
-from _input import input
 from data_loader import close_df
 
 
 @expressify
-def card_price_chart(get_filtered_close):
+def card_price_chart(get_filtered_close, selected_ticker):  # ← add selected_ticker
     with ui.card(full_screen=True):
         ui.card_header("Historical Closing Price Trend")
 
         @render_plotly
         def render_stock_price_chart():
-            ticker = input.ticker()
+            ticker = selected_ticker()  # ← was input.ticker()
             df = get_filtered_close().copy()
 
             if df.empty or ticker not in df.columns:

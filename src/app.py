@@ -5,7 +5,7 @@ from shiny.express import ui
 from tabs.tab_dashboard import dashboard_tab
 from tabs.tab_chat import chat_tab
 
-ui.page_opts(title="Magnificent 7 Stock Explorer", fillable=True)
+ui.page_opts(title="Magnificent 7 Stock Tracker", fillable=True)
 
 ui.tags.style(
     """

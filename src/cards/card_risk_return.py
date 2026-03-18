@@ -3,11 +3,9 @@ import plotly.graph_objects as go
 from shiny.express import expressify, ui
 from shinywidgets import render_plotly
 
-from _input import input
-
 
 @expressify
-def card_risk_return(risk_return_df):
+def card_risk_return(risk_return_df, selected_ticker):  # ← add selected_ticker
     with ui.card(full_screen=True):
         with ui.card_header():
             ui.div(
@@ -19,7 +17,7 @@ def card_risk_return(risk_return_df):
         @render_plotly
         def rr_plot():
             rr = risk_return_df()
-            hi = input.ticker()
+            hi = selected_ticker()  # ← was input.ticker()
 
             X_MIN, X_MAX = 0.0, 1.0
             Y_MIN, Y_MAX = -0.10, 1.0
