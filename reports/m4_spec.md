@@ -61,6 +61,45 @@ click‑to‑select is intuitive and immediately visible in the UI.
 - Price Performance vs. S&P 500 Benchmark (`card_sp500.py`)
 - Risk-Return Profile (`card_risk_return.py`)
 
+
+## 2.1 Updated Job Stories
+
+| # | Job Story | Status | Notes |
+|---:|---|:---:|---|
+| 1 | When I want to compare Magnificent 7 companies, I want to view their key valuation and growth metrics side-by-side so I can quickly rank and evaluate them. | ✅ Implemented | Focus: sortable table based on metrics. |
+| 2 | When I analyze investment tradeoffs, I want to see a risk vs return scatter plot so I can understand how volatility relates to performance across companies. | ✅ Implemented | Hover tooltip should display ticker, return, and volatility. |
+| 3 | Portfolio Visualization: As an investor, when I select a stock from the Magnificent 7, I want to see its relative market capitalization compared to other companies in a treemap, so that I can understand the size and weight of each company in the portfolio at a glance. | ✅ Implemented | Implemented as component 7 (Portfolio Treemap), highlights selected stock in blue and supports click-to-select. |
+| 4 | Watchlist Tracking: As an investor, when I monitor my watchlist stocks, I want to see their latest price changes in both dollar and percentage formats (togglable), so that I can quickly assess performance and decide whether to buy or sell. | ✅ Implemented | Implemented as component 8 (Watchlist), uses color-coded changes (green/red). |
+| 5 | Performance Comparison: As an investor I want to compare historical stock performance across the Magnificent 7, so that I can identify which companies are leading or lagging over a selected time period, and also compare these stocks to the S&P 500 so I can understand how top tech stocks compare. | ✅ Implemented | No changes needed, accounted for by components 3 and 4. |
+| 6   | Reporting: As an investor I want to be able to see a quick preview of the current state of each of the magnificent 7, including current price and performance, so that I can identify which companies are performing better. | ✅ Implemented | Accounted for by component 1 |
+| 7   | Performance tracking: As an investor I want to be able to track the performance of each stock from the Magnificent 7, that i select,over time, so that I can make informed decisions about buying or selling. | ✅ Implemented | Accounted for by component 2|
+---
+
+## 2.2 Component Inventory
+
+| ID | Type | Shiny widget / renderer | Depends on | Job story |
+|---|---|---|---|---|
+| `ticker` | Input | `ui.input_selectize()` | — | #1, #2, #3, #5 |
+| `dates` | Input | `ui.input_date_range()` | — | #2, #5 |
+| `rr_period` | Input | `ui.input_selectize()` (Full, 1Y, 5Y, 10Y) | — | #2 |
+| `metrics_sort_by` | Input | `ui.input_select()` | — | #1 |
+| `metrics_sort_dir` | Input | `ui.input_radio_buttons()` | — | #1 |
+| `watchlist_toggle` | Input | `ui.input_switch()` | — | #4 |
+| `selected_ticker` | Reactive value | `reactive.Value()` | `ticker`, treemap click | #2, #3, #5 |
+| `get_filtered_close` | Reactive calc | `@reactive.calc` | `dates` | #5 |
+| `analysis_close` | Reactive calc | `@reactive.calc` | `dates`, `rr_period` | #2 |
+| `get_normalized_close` | Reactive calc | `@reactive.calc` | `get_filtered_close` | #5 |
+| `risk_return_df` | Reactive calc | `@reactive.calc` | `analysis_close`, `rr_period` | #2 |
+| `render_stock_metrics_table` | Output | `@render.data_frame` → `render.DataGrid` | `metric_df`, `metrics_sort_by`, `metrics_sort_dir` | #1 |
+| `rr_plot` | Output | `@render_plotly` | `risk_return_df`, `selected_ticker` | #2 |
+| `render_current_price` | Output   | `@render_plotly`| `close_df`, `metric_df`, `selected_ticker` | #1 |
+| `render_portfolio_treemap` | Output | `@render_plotly` | `selected_ticker` | #3 |
+| `render_watchlist` | Output | `@render.data_frame` | `watchlist_toggle` | #4 |
+| `render_performance_comparison` | Output | `@render_plotly` | `get_filtered_close`, `get_normalized_close`, `selected_ticker` | #5 |
+| `render_sp500_comparison` | Output | `@render_plotly` | `get_filtered_close`, `selected_ticker`, `dates` | #5 |
+| `render_stock_price_chart`| Output | `@render_plotly`| `get_filtered_close`, `selected_ticker`| #2 |
+
+
 ## Calculation Details
 
 ### `get_filtered_close`
