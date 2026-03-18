@@ -62,7 +62,7 @@ click‑to‑select is intuitive and immediately visible in the UI.
 - Risk-Return Profile (`card_risk_return.py`)
 
 
-## 2.1 Updated Job Stories
+## Updated Job Stories
 
 | # | Job Story | Status | Notes |
 |---:|---|:---:|---|
@@ -75,7 +75,7 @@ click‑to‑select is intuitive and immediately visible in the UI.
 | 7   | Performance tracking: As an investor I want to be able to track the performance of each stock from the Magnificent 7, that i select,over time, so that I can make informed decisions about buying or selling. | ✅ Implemented | Accounted for by component 2|
 ---
 
-## 2.2 Component Inventory
+## Component Inventory
 
 | ID | Type | Shiny widget / renderer | Depends on | Job story |
 |---|---|---|---|---|
