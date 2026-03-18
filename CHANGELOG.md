@@ -41,10 +41,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 <!-- One short paragraph describing what you built and what it does for the user. -->
 
-- **Option chosen:** A / B / C / D
-- **PR:** #...
-- **Why this option over the others:** <!-- 1–2 sentences; link to your feature prioritization issue -->
-- **Feature prioritization issue link:** #...
+- **Option chosen:** D
+- **PR:** #85
+- **Why this option over the others:** 
+We selected **Option D: Component click event interaction** because it best fits our
+dashboard's primary workflow: exploring a portfolio by clicking on a visual summary
+and immediately seeing linked, detailed views update.
+- **Feature prioritization issue link:** #77
 
 ### Collaboration
 
