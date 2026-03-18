@@ -39,8 +39,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Release Highlight: [Name of your advanced feature]
 
-<!-- One short paragraph describing what you built and what it does for the user. -->
-
 - **Option chosen:** D
 - **PR:** #85
 - **Why this option over the others:** 
@@ -51,11 +49,10 @@ and immediately seeing linked, detailed views update.
 
 ### Collaboration
 
-<!-- Summary of workflow or collaboration improvements made since M3. -->
+- **CONTRIBUTING.md:** #95
+- **M3 retrospective:** After M3 feedback, we shifted to smaller, scoped PRs with spec-first updates and earlier peer review to reduce last-minute merges.
+- **M4:** We split tasks more evenly. 
 
-- **CONTRIBUTING.md:** <!-- Link to the PR that updated it with your M3 retrospective and M4 norms. -->
-- **M3 retrospective:** <!-- What changed in your workflow after M3 collaboration feedback. -->
-- **M4:** <!-- What you tried or improved this milestone. -->
 
 ### Reflection
 - *Pytest unit test*: test_compute_risk_return_basic. It checks the function in refactored.py, compute_risk_return. This test validates the core math in compute_risk_return, the annualization of daily returns and volatility. The logic is nearly identical, it ensures that it sets the Date index, optionally filter by cutoff, compute pct_change, and annualize mean and std by 252, it just has the reactive dependencies removed
